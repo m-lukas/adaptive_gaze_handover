@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import List
 
 import numpy as np
 
@@ -29,9 +30,9 @@ mean_fixation_vectors = {
 }
 
 
-def calibration_loop(target: str):
+def calibration_loop(target: str, num_frames: int = 100):
     counter = 0
-    while counter < 100:
+    while counter < num_frames:
         ret, frame = v.read()
         if ret:
             gaze_result = pg.predict(frame)
@@ -46,9 +47,34 @@ def find_closest_fixation(current_gaze_vector: np.ndarray) -> str:
         np.linalg.norm(current_gaze_vector - vec)
         for vec in mean_fixation_vectors.values()
     ]
+    
+    print({
+        "robot_face": distances[0],
+        "pose1": distances[1],
+        "pose2": distances[2],
+        "own_items": distances[3],
+    })
 
     most_similar_index = np.argmin(distances)
     return list(mean_fixation_vectors.keys())[most_similar_index]
+
+
+def remove_outliers(vector_list: List[np.ndarray], sd_threshold=3) -> List[np.ndarray]:
+    vector_list_array = np.stack(vector_list)  # Shape: (n_samples, n_features)
+    mean = np.mean(vector_list_array, axis=0)
+    std_dev = np.std(vector_list_array, axis=0)
+    distances = np.linalg.norm(vector_list_array - mean, axis=1)
+    mask = distances < sd_threshold * np.linalg.norm(std_dev)
+    filtered_vectors = vector_list_array[mask]
+    return [np.array(vec) for vec in filtered_vectors]
+
+
+def calculate_mean_fixation_vectors() -> None:
+    for target in mean_fixation_vectors.keys():
+        print("Before", len(gaze_calibration_vectors[target]))
+        gaze_calibration_vectors[target] = remove_outliers(gaze_calibration_vectors[target])
+        print("After", len(gaze_calibration_vectors[target]))
+        mean_fixation_vectors[target] = np.mean(gaze_calibration_vectors[target], axis=0)
 
 
 input("Press ENTER to capture Robot Face ...")
@@ -65,14 +91,9 @@ calibration_loop("own_items")
 
 print("DONE ...")
 
-mean_fixation_vectors["robot_face"] = np.mean(
-    gaze_calibration_vectors["robot_face"], axis=0
-)
-mean_fixation_vectors["pose1"] = np.mean(gaze_calibration_vectors["pose1"], axis=0)
-mean_fixation_vectors["pose2"] = np.mean(gaze_calibration_vectors["pose2"], axis=0)
-mean_fixation_vectors["own_items"] = np.mean(
-    gaze_calibration_vectors["own_items"], axis=0
-)
+
+calculate_mean_fixation_vectors()
+
 
 print("[Robot Face] Mean Fixation Vector:", str(mean_fixation_vectors["robot_face"]))
 print("[Pose1] Mean Fixation Vector:", str(mean_fixation_vectors["pose1"]))
