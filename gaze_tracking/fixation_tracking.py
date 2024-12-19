@@ -46,6 +46,7 @@ def find_closest_fixation(current_gaze_vector: np.ndarray) -> str:
 	most_similar_index = np.argmin(distances)
 	return list(mean_fixation_vectors.keys())[most_similar_index]
 
+
 input("Press ENTER to capture Robot Face ...")
 calibration_loop("robot_face")
 
