@@ -6,10 +6,11 @@ authors = ["m-lukas <mail@lukasmueller.de>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.11"
 black = "^24.10.0"
 isort = "^5.13.2"
 pygame = "^2.6.1"
+numpy = "^2.2.6"
 
 
 [build-system]
