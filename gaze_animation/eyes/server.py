@@ -1,5 +1,6 @@
 import math
 import threading
+from programs import GazeProgram, Transition
 import pygame
 import sys
 import numpy as np
@@ -33,8 +34,6 @@ eye_left_pos = ((WIDTH*0.25)-eye_radius_*0.5, HEIGHT/2 -eye_radius/2 )
 eye_right_pos = ((0.75*WIDTH)-eye_radius_*0.5, HEIGHT/2 -eye_radius/2)
 pupil_offset = [0,150] # current offset
 max_pupil_offsets = [75,35]  # Ausweichpos der Pupillen (x,y)
-
-last_pupil_offset = pupil_offset
 
 lid_height = 0  # Hoehe des Augenlids (0 bedeutet offen)
 saved_lid_height = 0
@@ -70,33 +69,32 @@ app = Flask(__name__)
 
 animation_lock = threading.Lock()
 current_command = {
-    "start_pos": [0.0],
-    "current_target": [0.0],
-    "duration": 0,
+    "program": None,
     "elapsed": 0,
     "current_pos": [0,0]
 }
 
 @app.route('/move', methods=['POST'])
 def move():
-    global current_command, last_pupil_offset
+    global current_command
     data = request.get_json()
     try:
-        next_target = [float(data.get("x")),float(data.get("y"))]
+        x = float(data.get("x"))
+        y = float(data.get("y"))
         duration = float(data.get("duration", 0.1))
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid input"}), 400
 
     with animation_lock:
         current_command.update({
-            "start_pos": current_command["current_pos"][:],
-            "current_target": next_target,
-            "duration": duration,
+            "program": GazeProgram(
+                saccades=[Transition(x,y,duration)],
+                start_pos=current_command["current_pos"][:]
+            ),
             "elapsed": 0
         })
-        last_pupil_offset = pupil_offset
 
-    return jsonify({"target": next_target, "duration": duration})
+    return jsonify({"target": [x,y], "duration": duration})
 
 
 font = pygame.font.SysFont(None, 32)  # You can specify font name instead of None
@@ -231,7 +229,8 @@ flask_thread = threading.Thread(target=run_flask, daemon=True)
 flask_thread.start()
 
 def ease_out(t):
-    return 1 - math.exp(-5 * t)
+    #return t * t * (3 - 2 * t) for slow movements
+    return (1 - math.exp(-5 * t)) / (1 - math.exp(-5)) # fast movements
 
 # Main loop
 base_interval = 3  # Mittelwert (in Sekunden)
@@ -251,16 +250,23 @@ while running:
 
     dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
 
-    if current_command["elapsed"] < current_command["duration"]:
-        current_command["elapsed"] += dt
-        t = min(current_command["elapsed"] / current_command["duration"], 1.0)
-        eased_t = ease_out(t)
+    program: GazeProgram | None = current_command["program"]
+    if program:
+        current_step = program.saccades[program.index]
+        duration = current_step.duration
 
-        current_command["current_pos"][0] = current_command["start_pos"][0] + (current_command["current_target"][0] - current_command["start_pos"][0]) * eased_t
-        current_command["current_pos"][1] = current_command["start_pos"][1] + (current_command["current_target"][1] - current_command["start_pos"][1]) * eased_t
-    else:
-        with animation_lock:
-            last_pupil_offset = pupil_offset
+        if current_command["elapsed"] < duration:
+            current_command["elapsed"] += dt
+
+            if isinstance(current_step, Transition):
+                t = min(current_command["elapsed"] / duration, 1.0)
+                eased_t = current_step.ease_function(t)
+
+                current_command["current_pos"][0] = program.start_pos[0] + (current_step.x - program.start_pos[0]) * eased_t
+                current_command["current_pos"][1] = program.start_pos[1] + (current_step.y - program.start_pos[1]) * eased_t
+        else:
+            with animation_lock:
+                program.index = min(program.index + 1, len(program.saccades) - 1)
 
     animate_gaze(current_command["current_pos"])
     
