@@ -1,6 +1,6 @@
 import math
 import threading
-from programs import GazeProgram, Transition
+from programs import GazeProgram, Transition, programs
 import pygame
 import sys
 import numpy as np
@@ -8,6 +8,7 @@ from math import pi as PI
 from flask import Flask, request, jsonify
 import random
 import time
+import copy
 
 
 pygame.init()
@@ -73,6 +74,24 @@ current_command = {
     "elapsed": 0,
     "current_pos": [0,0]
 }
+
+@app.route('/trigger', methods=['POST'])
+def trigger():
+    global current_command
+    data = request.get_json()
+    try:
+        name = data["program"]
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid input"}), 400
+    
+    if name in programs:
+        with animation_lock:
+            current_command.update({
+                "program": copy.copy(programs[name]),
+                "elapsed": 0
+            })
+
+    return jsonify({"program": name})
 
 @app.route('/move', methods=['POST'])
 def move():
@@ -266,7 +285,12 @@ while running:
                 current_command["current_pos"][1] = program.start_pos[1] + (current_step.y - program.start_pos[1]) * eased_t
         else:
             with animation_lock:
-                program.index = min(program.index + 1, len(program.saccades) - 1)
+                current_command["elapsed"] = 0
+                if program.index < len(program.saccades) - 1:
+                    program.start_pos = current_command["current_pos"][:]
+                    program.index += 1
+                else:
+                    current_command["program"] = None
 
     animate_gaze(current_command["current_pos"])
     

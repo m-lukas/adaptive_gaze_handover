@@ -21,3 +21,15 @@ class GazeProgram:
       self.saccades = saccades
       self.start_pos = start_pos
       self.index = 0
+
+
+programs = {
+   "test1": GazeProgram(
+      saccades=[
+         Transition(1,0.7,0.1),
+         Delay(3),
+         Transition(-0.5,1,4,EaseFunction.SMOOTHSTEP)
+      ],
+      start_pos=[0,0]
+   )
+}
