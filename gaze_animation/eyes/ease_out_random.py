@@ -1,3 +1,4 @@
+import math
 import pygame
 import sys
 import numpy as np
@@ -139,17 +140,17 @@ def draw_eyes():
     pygame.draw.circle(screen, BLACK, right_pupil_pos, pupil_radius)
     
     #Mini-Pupille
-    left_mini_pupil_pos = (left_pupil_pos[0]+ pupil_offset[0]/2 ,left_pupil_pos[1]+ pupil_offset[1])
-    right_mini_pupil_pos = (right_pupil_pos[0]+ pupil_offset[0]/2,right_pupil_pos[1]+ pupil_offset[1])
+    # left_mini_pupil_pos = (left_pupil_pos[0]+ pupil_offset[0]/2 ,left_pupil_pos[1]+ pupil_offset[1])
+    # right_mini_pupil_pos = (right_pupil_pos[0]+ pupil_offset[0]/2,right_pupil_pos[1]+ pupil_offset[1])
     
-    if (looking_down or looking_up) and (looking_left or looking_right):
-        left_mini_pupil_pos = (left_pupil_pos[0]+ 0.71*pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.71*pupil_offset[1])
-        right_mini_pupil_pos = (right_pupil_pos[0]+ 0.71*pupil_offset[0]/2,right_pupil_pos[1]+ 0.71*pupil_offset[1])
+    #if (looking_down or looking_up) and (looking_left or looking_right):
+    left_mini_pupil_pos = (left_pupil_pos[0]+ 0.71*pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.71*pupil_offset[1])
+    right_mini_pupil_pos = (right_pupil_pos[0]+ 0.71*pupil_offset[0]/2,right_pupil_pos[1]+ 0.71*pupil_offset[1])
 
     # Randomize Richtung von Mini-Pupille wenn augen geradeaus
-    if looking_straight():
-        left_mini_pupil_pos = (left_pupil_pos[0]+ 0.1*last_pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.1*last_pupil_offset[1])
-        right_mini_pupil_pos = (right_pupil_pos[0]+ 0.1*last_pupil_offset[0]/2,right_pupil_pos[1]+ 0.1*last_pupil_offset[1])
+    # if looking_straight():
+    #     left_mini_pupil_pos = (left_pupil_pos[0]+ 0.1*last_pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.1*last_pupil_offset[1])
+    #     right_mini_pupil_pos = (right_pupil_pos[0]+ 0.1*last_pupil_offset[0]/2,right_pupil_pos[1]+ 0.1*last_pupil_offset[1])
     
     pygame.draw.circle(screen, WHITE, left_mini_pupil_pos, pupil_radius/5)
     pygame.draw.circle(screen, WHITE, right_mini_pupil_pos, pupil_radius/5)
@@ -196,18 +197,22 @@ def animate_gaze(coordinates):
     draw_mouth()
 
 movements = [
-    (0,0,1),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
+    (random.uniform(-1, 1), random.uniform(-1, 1), 0.5),
+    (random.uniform(-1, 1), random.uniform(-1, 1), 0.5),
+    (random.uniform(-1, 1), random.uniform(-1, 1), 0.5),
+    (random.uniform(-1, 1), random.uniform(-1, 1), 0.5),
+    (random.uniform(-1, 1), random.uniform(-1, 1), 0.5),
+    (random.uniform(-1, 1), random.uniform(-1, 1), 0.5),
 ]
+
+def ease_out(t):
+    return 1 - math.exp(-5 * t)
 
 
 current_target = movements[0]
 current_pos = [0,0]
+start_pos = current_pos[:]
+elapsed_time = 0
 
 # Main loop
 base_interval = 3  # Mittelwert (in Sekunden)
@@ -225,20 +230,37 @@ while running:
             pygame.quit()
             sys.exit()
 
-    # Smoothly interpolate towards the target position
-    current_pos[0] += (current_target[0] - current_pos[0]) * current_target[2]/TICKS_PER_SECOND
-    current_pos[1] += (current_target[1] - current_pos[1]) * current_target[2]/TICKS_PER_SECOND
+    #if current_target[2] > 0:
+    dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
 
-    animate_gaze(current_pos)
+    if elapsed_time < current_target[2]:
+        elapsed_time += dt
+        t = min(elapsed_time / current_target[2], 1.0)
+        eased_t = ease_out(t)
 
-    # Check if the current position is close enough to the target
-    if abs(current_target[0] - current_pos[0]) < 0.01 and abs(current_target[1] - current_pos[1]) < 0.01:
+        current_pos[0] = start_pos[0] + (current_target[0] - start_pos[0]) * eased_t
+        current_pos[1] = start_pos[1] + (current_target[1] - start_pos[1]) * eased_t
+
+        animate_gaze(current_pos)
+    else:
+        elapsed_time = 0
         movements_index = (movements_index + 1) % len(movements)  # Move to the next target
+        start_pos = current_target[:]
         current_target = movements[movements_index]
         last_pupil_offset = pupil_offset
+        pygame.time.delay(1000)
+    #else:
+    #    current_pos[current_target[0], current_target[1]]
+
+    # Check if the current position is close enough to the target
+    # if abs(current_target[0] - current_pos[0]) < 0.01 and abs(current_target[1] - current_pos[1]) < 0.01:
+    #     movements_index = (movements_index + 1) % len(movements)  # Move to the next target
+    #     start_pos = current_target[:]
+    #     current_target = movements[movements_index]
+    #     last_pupil_offset = pupil_offset
+        #pygame.time.delay(1000)
     
     pygame.display.flip()
-    pygame.time.Clock().tick(TICKS_PER_SECOND)
 
 # Quit Pygame
 pygame.quit()

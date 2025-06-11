@@ -1,7 +1,10 @@
+import math
+import threading
 import pygame
 import sys
 import numpy as np
 from math import pi as PI
+from flask import Flask, request, jsonify
 import random
 import time
 
@@ -62,6 +65,39 @@ looking_left = False
 looking_right = False
 
 movements_index = 0
+
+app = Flask(__name__)
+
+animation_lock = threading.Lock()
+current_command = {
+    "start_pos": [0.0],
+    "current_target": [0.0],
+    "duration": 0,
+    "elapsed": 0,
+    "current_pos": [0,0]
+}
+
+@app.route('/move', methods=['POST'])
+def move():
+    global current_command, last_pupil_offset
+    data = request.get_json()
+    try:
+        next_target = [float(data.get("x")),float(data.get("y"))]
+        duration = float(data.get("duration", 0.1))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid input"}), 400
+
+    with animation_lock:
+        current_command.update({
+            "start_pos": current_command["current_pos"][:],
+            "current_target": next_target,
+            "duration": duration,
+            "elapsed": 0
+        })
+        last_pupil_offset = pupil_offset
+
+    return jsonify({"target": next_target, "duration": duration})
+
 
 font = pygame.font.SysFont(None, 32)  # You can specify font name instead of None
 
@@ -138,18 +174,9 @@ def draw_eyes():
     pygame.draw.circle(screen, BLACK, left_pupil_pos, pupil_radius)
     pygame.draw.circle(screen, BLACK, right_pupil_pos, pupil_radius)
     
-    #Mini-Pupille
-    left_mini_pupil_pos = (left_pupil_pos[0]+ pupil_offset[0]/2 ,left_pupil_pos[1]+ pupil_offset[1])
-    right_mini_pupil_pos = (right_pupil_pos[0]+ pupil_offset[0]/2,right_pupil_pos[1]+ pupil_offset[1])
-    
-    if (looking_down or looking_up) and (looking_left or looking_right):
-        left_mini_pupil_pos = (left_pupil_pos[0]+ 0.71*pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.71*pupil_offset[1])
-        right_mini_pupil_pos = (right_pupil_pos[0]+ 0.71*pupil_offset[0]/2,right_pupil_pos[1]+ 0.71*pupil_offset[1])
-
-    # Randomize Richtung von Mini-Pupille wenn augen geradeaus
-    if looking_straight():
-        left_mini_pupil_pos = (left_pupil_pos[0]+ 0.1*last_pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.1*last_pupil_offset[1])
-        right_mini_pupil_pos = (right_pupil_pos[0]+ 0.1*last_pupil_offset[0]/2,right_pupil_pos[1]+ 0.1*last_pupil_offset[1])
+    #if (looking_down or looking_up) and (looking_left or looking_right):
+    left_mini_pupil_pos = (left_pupil_pos[0]+ 0.71*pupil_offset[0]/2 ,left_pupil_pos[1]+ 0.71*pupil_offset[1])
+    right_mini_pupil_pos = (right_pupil_pos[0]+ 0.71*pupil_offset[0]/2,right_pupil_pos[1]+ 0.71*pupil_offset[1])
     
     pygame.draw.circle(screen, WHITE, left_mini_pupil_pos, pupil_radius/5)
     pygame.draw.circle(screen, WHITE, right_mini_pupil_pos, pupil_radius/5)
@@ -195,19 +222,16 @@ def animate_gaze(coordinates):
     draw_brows()
     draw_mouth()
 
-movements = [
-    (0,0,1),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-    (random.uniform(-1, 1), random.uniform(-1, 1), 2),
-]
+def run_flask():
+    app.run(port=5000)
+# ------------------------------
 
+# ----- Start Flask in a thread -----
+flask_thread = threading.Thread(target=run_flask, daemon=True)
+flask_thread.start()
 
-current_target = movements[0]
-current_pos = [0,0]
+def ease_out(t):
+    return 1 - math.exp(-5 * t)
 
 # Main loop
 base_interval = 3  # Mittelwert (in Sekunden)
@@ -225,20 +249,22 @@ while running:
             pygame.quit()
             sys.exit()
 
-    # Smoothly interpolate towards the target position
-    current_pos[0] += (current_target[0] - current_pos[0]) * current_target[2]/TICKS_PER_SECOND
-    current_pos[1] += (current_target[1] - current_pos[1]) * current_target[2]/TICKS_PER_SECOND
+    dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
 
-    animate_gaze(current_pos)
+    if current_command["elapsed"] < current_command["duration"]:
+        current_command["elapsed"] += dt
+        t = min(current_command["elapsed"] / current_command["duration"], 1.0)
+        eased_t = ease_out(t)
 
-    # Check if the current position is close enough to the target
-    if abs(current_target[0] - current_pos[0]) < 0.01 and abs(current_target[1] - current_pos[1]) < 0.01:
-        movements_index = (movements_index + 1) % len(movements)  # Move to the next target
-        current_target = movements[movements_index]
-        last_pupil_offset = pupil_offset
+        current_command["current_pos"][0] = current_command["start_pos"][0] + (current_command["current_target"][0] - current_command["start_pos"][0]) * eased_t
+        current_command["current_pos"][1] = current_command["start_pos"][1] + (current_command["current_target"][1] - current_command["start_pos"][1]) * eased_t
+    else:
+        with animation_lock:
+            last_pupil_offset = pupil_offset
+
+    animate_gaze(current_command["current_pos"])
     
     pygame.display.flip()
-    pygame.time.Clock().tick(TICKS_PER_SECOND)
 
 # Quit Pygame
 pygame.quit()
