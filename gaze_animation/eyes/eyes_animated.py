@@ -1,6 +1,6 @@
-import pygame
 import math
 
+import pygame
 
 pygame.init()
 
@@ -21,8 +21,17 @@ CENTER_Y = 200
 
 # Predefined positions for pupil animation
 pupil_positions = [
-    (220, 180), (240, 220), (380, 240), (330, 300), (200, 120), (180, 220),
-    (265, 200), (400, 200), (350, 220), (380, 180), (265, 300)
+    (220, 180),
+    (240, 220),
+    (380, 240),
+    (330, 300),
+    (200, 120),
+    (180, 220),
+    (265, 200),
+    (400, 200),
+    (350, 220),
+    (380, 180),
+    (265, 300),
 ]
 position_index = 0  # Start with the first position
 current_pupil_x, current_pupil_y = pupil_positions[0]  # Initial position
@@ -30,8 +39,10 @@ current_pupil_x, current_pupil_y = pupil_positions[0]  # Initial position
 # Transition speed
 transition_speed = 0.03  # Speed of transition (smaller is slower)
 
+
 def update():
     pass
+
 
 def draw(pupil_target):
     screen.fill(WHITE)
@@ -49,14 +60,18 @@ def draw(pupil_target):
 
         pygame.draw.circle(screen, BLACK, (eye_x, eye_y), 54)  # Black border
         pygame.draw.circle(screen, WHITE, (eye_x, eye_y), 50)  # White eye
-        pygame.draw.circle(screen, LIGHT_BLUE, (int(pupil_x), int(pupil_y)), 17)  # Draw pupil
+        pygame.draw.circle(
+            screen, LIGHT_BLUE, (int(pupil_x), int(pupil_y)), 17
+        )  # Draw pupil
 
     def draw_eyebrow(eye_x, eye_y):
         eyebrow_width = 80
         eyebrow_height = 10
         eyebrow_x = eye_x - eyebrow_width // 2
         eyebrow_y = eye_y - 75  # Position above the eye
-        pygame.draw.rect(screen, BROWN, (eyebrow_x, eyebrow_y, eyebrow_width, eyebrow_height))
+        pygame.draw.rect(
+            screen, BROWN, (eyebrow_x, eyebrow_y, eyebrow_width, eyebrow_height)
+        )
 
     def draw_mouth():
         mouth_center_x = CENTER_X
@@ -65,8 +80,10 @@ def draw(pupil_target):
         thickness = 7
 
         # Draw the hollow red circle for the mouth
-        pygame.draw.circle(screen, DARK_RED, (mouth_center_x, mouth_center_y), mouth_radius, thickness)
-    
+        pygame.draw.circle(
+            screen, DARK_RED, (mouth_center_x, mouth_center_y), mouth_radius, thickness
+        )
+
     LEFT_EYE = (190, 200)
     RIGHT_EYE = (340, 200)
 
@@ -77,6 +94,7 @@ def draw(pupil_target):
     draw_eye(RIGHT_EYE[0], RIGHT_EYE[1])
 
     draw_mouth()
+
 
 # Main loop
 running = True
@@ -97,7 +115,9 @@ while running:
 
     # Check if the current position is close enough to the target
     if abs(current_pupil_x - target_x) < 1 and abs(current_pupil_y - target_y) < 1:
-        position_index = (position_index + 1) % len(pupil_positions)  # Move to the next target
+        position_index = (position_index + 1) % len(
+            pupil_positions
+        )  # Move to the next target
 
     # Draw the scene with the updated pupil position
     draw((current_pupil_x, current_pupil_y))
