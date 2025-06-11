@@ -358,11 +358,6 @@ flask_thread = threading.Thread(target=run_flask, daemon=True)
 flask_thread.start()
 
 
-def ease_out(t):
-    # return t * t * (3 - 2 * t) for slow movements
-    return (1 - math.exp(-5 * t)) / (1 - math.exp(-5))  # fast movements
-
-
 # Main loop
 base_interval = 3  # Mittelwert (in Sekunden)
 std_dev = 1  # Standardabweichung (in Sekunden)
