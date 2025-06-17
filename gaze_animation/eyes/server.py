@@ -85,8 +85,10 @@ def trigger():
         return jsonify({"error": "Invalid input"}), 400
 
     if name in programs:
+        program = copy.copy(programs[name])
         with animation_lock:
-            current_command.update({"program": copy.copy(programs[name]), "elapsed": 0})
+            program.start_pos = current_command["current_pos"]
+            current_command.update({"program": program, "elapsed": 0})
 
     return jsonify({"program": name})
 
