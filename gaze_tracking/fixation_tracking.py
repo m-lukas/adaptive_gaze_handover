@@ -1,14 +1,20 @@
 import os
 import sys
+import time
 from typing import List
 
 import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import math
+import requests
 
 import cv2
 from pygaze import PyGaze, PyGazeRenderer
+
+
+FIXATION_TIME_THRESHOLD = 0.5
+
 
 pg = PyGaze(model_path="models/eth-xgaze_resnet18.pth")
 pgren = PyGazeRenderer()
@@ -28,6 +34,28 @@ mean_fixation_vectors = {
     "pose2": None,
     "own_items": None,
 }
+
+
+class GazeDetectionFilter:
+    def __init__(self):
+        self.current_fixation = None
+        self.fixation_start_time = None
+        self.last_triggered_fixation = None
+
+    def update_gaze(self, fixation: str):
+        now = time.time()
+
+        if fixation != self.current_fixation:
+            self.current_fixation = fixation
+            self.fixation_start_time = now
+            return None
+
+        duration = now - self.fixation_start_time
+        if duration >= FIXATION_TIME_THRESHOLD and fixation != self.last_triggered_fixation:
+            self.last_triggered_fixation = fixation
+            return fixation
+
+        return None
 
 
 def calibration_loop(target: str, num_frames: int = 100):
@@ -80,6 +108,30 @@ def calculate_mean_fixation_vectors() -> None:
         mean_fixation_vectors[target] = np.mean(gaze_calibration_vectors[target], axis=0)
 
 
+def trigger_gaze_animation(fixation: str):
+    if fixation == "robot_face":
+        x = 0
+        y = -0.3
+    elif fixation == "pose1":
+        x = -1
+        y = 0.6
+    elif fixation == "pose2":
+        x = 1
+        y = 0.6
+    elif fixation == "own_items":
+        x = 0
+        y = 1
+
+    url = "http://127.0.0.1:5000/move"
+    payload = {"x": x, "y": y, "duration": 1}
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    requests.request("POST", url, headers=headers, json=payload)
+    print("Triggered gaze change.")
+
+
 input("Press ENTER to capture Robot Face ...")
 calibration_loop("robot_face")
 
@@ -106,6 +158,7 @@ print("[Own Items] Mean Fixation Vector:", str(mean_fixation_vectors["own_items"
 print("\n\n")
 input("Press ENTER to start recording ...")
 
+filter = GazeDetectionFilter()
 while v.isOpened():
     ret, frame = v.read()
     if ret:
@@ -139,6 +192,10 @@ while v.isOpened():
             cv2.putText(
                 frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2
             )
+
+            stable_fixation = filter.update_gaze(fixation)
+            if stable_fixation:
+                trigger_gaze_animation(fixation)
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
