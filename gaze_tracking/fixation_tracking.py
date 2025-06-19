@@ -37,14 +37,17 @@ def calibration_loop(target: str, num_frames: int = 100):
         if ret:
             gaze_result = pg.predict(frame)
             if len(gaze_result) == 1:
-                gaze_calibration_vectors[target].append(gaze_result[0].gaze_vector)
+                gaze_calibration_vectors[target].append(
+                    [gaze_result[0].gaze_vector[0], gaze_result[0].gaze_vector[1]]
+                )
 
         counter += 1
 
 
 def find_closest_fixation(current_gaze_vector: np.ndarray) -> str:
+    reduced_vector = [current_gaze_vector[0], current_gaze_vector[1]]
     distances = [
-        np.linalg.norm(current_gaze_vector - vec)
+        np.linalg.norm(reduced_vector - vec)
         for vec in mean_fixation_vectors.values()
     ]
     
@@ -103,11 +106,12 @@ print("[Own Items] Mean Fixation Vector:", str(mean_fixation_vectors["own_items"
 print("\n\n")
 input("Press ENTER to start recording ...")
 
-while True:
+while v.isOpened():
     ret, frame = v.read()
     if ret:
         gaze_result = pg.predict(frame)
-        for face in gaze_result:
+        if gaze_result:
+            face = gaze_result[0]
             color = (0, 255, 0)
             if pg.look_at_camera(face):
                 color = (255, 0, 0)

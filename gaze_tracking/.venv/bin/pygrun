@@ -1,4 +1,4 @@
-#!/Users/m-lukas/Documents/TU Berlin/Dateien/Masterarbeit/gaze_tracking_pygaze/.venv/bin/python3.10
+#!/Users/m-lukas/Documents/Projects/gaze_tracking_pygaze/.venv/bin/python3.10
 __author__ = 'jszheng'
 import optparse
 import sys
