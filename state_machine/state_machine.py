@@ -117,7 +117,11 @@ class UpdatedState:
 
 
 HandoverTransition = Tuple[
-    HandoverState, Callable[[StateUpdate, CurrentState], bool], HandoverState, ArmProgram | None, GazeProgram | None
+    HandoverState,
+    Callable[[StateUpdate, CurrentState], bool],
+    HandoverState,
+    ArmProgram | None,
+    GazeProgram | None,
 ]
 GazeTransition = Tuple[
     HandoverState, GazeProgram, Callable[[StateUpdate, CurrentState], bool], GazeProgram
@@ -129,11 +133,11 @@ class StateMachine:
         self.dynamic_gaze = dynamic_gaze
 
         self.state = CurrentState(
-            current_handover_state = HandoverState.NO_ACTIVE_HANDOVER,
-            current_gaze_program = GazeProgram.IDLE,
-            last_arm_location = ArmLocation.IDLE,
-            last_gaze_update = datetime.now(),
-            initiated_handover_waiting=None
+            current_handover_state=HandoverState.NO_ACTIVE_HANDOVER,
+            current_gaze_program=GazeProgram.IDLE,
+            last_arm_location=ArmLocation.IDLE,
+            last_gaze_update=datetime.now(),
+            initiated_handover_waiting=None,
         )
 
         self.handover_transitions: List[HandoverTransition] = [
@@ -143,14 +147,14 @@ class StateMachine:
                 lambda u, c: u.handover_start_detected == HandoverInitiatedTray.LEFT,
                 HandoverState.MOVING_TO_PERSON_LEFT,
                 ArmProgram.MOVE_TO_LEFT_HANDOVER,
-                GazeProgram.MOVE_TO_PERSON_LEFT
+                GazeProgram.MOVE_TO_PERSON_LEFT,
             ),
             (
                 HandoverState.NO_ACTIVE_HANDOVER,
                 lambda u, c: u.handover_start_detected == HandoverInitiatedTray.RIGHT,
                 HandoverState.MOVING_TO_PERSON_RIGHT,
                 ArmProgram.MOVE_TO_RIGHT_HANDOVER,
-                GazeProgram.MOVE_TO_PERSON_RIGHT
+                GazeProgram.MOVE_TO_PERSON_RIGHT,
             ),
             # HS_MOVING_TO_PERSON_LEFT
             (
@@ -158,7 +162,7 @@ class StateMachine:
                 lambda u, c: u.new_arm_location == ArmLocation.HANDOVER_LOCATION,
                 HandoverState.WAITING_FOR_RECEIVAL_LEFT,
                 None,
-                GazeProgram.RECEIVING_LEFT
+                GazeProgram.RECEIVING_LEFT,
             ),
             # HS_MOVING_TO_PERSON_RIGHT
             (
@@ -166,7 +170,7 @@ class StateMachine:
                 lambda u, c: u.new_arm_location == ArmLocation.HANDOVER_LOCATION,
                 HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
                 None,
-                GazeProgram.RECEIVING_RIGHT
+                GazeProgram.RECEIVING_RIGHT,
             ),
             # HS_WAITING_FOR_RECEIVAL_LEFT
             (
@@ -174,7 +178,7 @@ class StateMachine:
                 lambda u, c: u.object_in_bowl == True,
                 HandoverState.MOVING_TO_PACKAGING_LEFT,
                 ArmProgram.MOVE_TO_PACKAGING,
-                GazeProgram.MOVE_TO_PACKAGING_LEFT
+                GazeProgram.MOVE_TO_PACKAGING_LEFT,
             ),
             # HS_WAITING_FOR_RECEIVAL_RIGHT
             (
@@ -182,7 +186,7 @@ class StateMachine:
                 lambda u, c: u.object_in_bowl == True,
                 HandoverState.MOVING_TO_PACKAGING_RIGHT,
                 ArmProgram.MOVE_TO_PACKAGING,
-                GazeProgram.MOVE_TO_PACKAGING_RIGHT
+                GazeProgram.MOVE_TO_PACKAGING_RIGHT,
             ),
             # HS_MOVING_TO_PACKAGING_LEFT
             (
@@ -190,7 +194,7 @@ class StateMachine:
                 lambda u, c: u.new_arm_location == ArmLocation.PACKAGING,
                 HandoverState.PACKAGING,
                 None,
-                None
+                None,
             ),
             # HS_MOVING_TO_PACKAGING_RIGHT
             (
@@ -198,30 +202,33 @@ class StateMachine:
                 lambda u, c: u.new_arm_location == ArmLocation.PACKAGING,
                 HandoverState.PACKAGING,
                 None,
-                None
+                None,
             ),
             # HS_PACKAGING
             (
                 HandoverState.PACKAGING,
-                lambda u, c: u.handover_finished == True and c.initiated_handover_waiting == None,
+                lambda u, c: u.handover_finished == True
+                and c.initiated_handover_waiting == None,
                 HandoverState.NO_ACTIVE_HANDOVER,
                 ArmProgram.IDLE,
-                GazeProgram.MUTUAL
+                GazeProgram.MUTUAL,
             ),
             (
                 HandoverState.PACKAGING,
-                lambda u, c: u.handover_finished == True and c.initiated_handover_waiting == HandoverInitiatedTray.LEFT,
+                lambda u, c: u.handover_finished == True
+                and c.initiated_handover_waiting == HandoverInitiatedTray.LEFT,
                 HandoverState.MOVING_TO_PERSON_LEFT,
                 ArmProgram.MOVE_TO_LEFT_HANDOVER,
-                GazeProgram.MOVE_TO_PERSON_LEFT
+                GazeProgram.MOVE_TO_PERSON_LEFT,
             ),
             (
                 HandoverState.PACKAGING,
-                lambda u, c: u.handover_finished == True and c.initiated_handover_waiting == HandoverInitiatedTray.RIGHT,
+                lambda u, c: u.handover_finished == True
+                and c.initiated_handover_waiting == HandoverInitiatedTray.RIGHT,
                 HandoverState.MOVING_TO_PERSON_RIGHT,
                 ArmProgram.MOVE_TO_RIGHT_HANDOVER,
-                GazeProgram.MOVE_TO_PERSON_RIGHT
-            ), 
+                GazeProgram.MOVE_TO_PERSON_RIGHT,
+            ),
         ]
 
         self.dynamic_gaze_transitions: List[GazeTransition] = [
@@ -266,7 +273,8 @@ class StateMachine:
             (
                 HandoverState.MOVING_TO_PERSON_LEFT,
                 GazeProgram.MOVE_TO_PERSON_LEFT,
-                lambda u, c: u.new_gaze_target in [GazeTarget.RIGHT_TRAY,GazeTarget.RIGHT_HANDOVER_LOCATION],
+                lambda u, c: u.new_gaze_target
+                in [GazeTarget.RIGHT_TRAY, GazeTarget.RIGHT_HANDOVER_LOCATION],
                 GazeProgram.LEFT_HANDOVER,
             ),
             (
@@ -291,7 +299,8 @@ class StateMachine:
             (
                 HandoverState.MOVING_TO_PERSON_RIGHT,
                 GazeProgram.MOVE_TO_PERSON_RIGHT,
-                lambda u, c: u.new_gaze_target in [GazeTarget.LEFT_TRAY,GazeTarget.LEFT_HANDOVER_LOCATION],
+                lambda u, c: u.new_gaze_target
+                in [GazeTarget.LEFT_TRAY, GazeTarget.LEFT_HANDOVER_LOCATION],
                 GazeProgram.RIGHT_HANDOVER,
             ),
             (
@@ -421,9 +430,22 @@ class StateMachine:
     def update_state(self, u: StateUpdate) -> UpdatedState:
         changes = UpdatedState()
 
-        if any([u.handover_start_detected,u.handover_finished,u.object_in_bowl,u.new_arm_location]):
-            for src, guard, dst, new_arm_prog, new_gaze_prog in self.handover_transitions:
-                if self.state.current_handover_state == src and guard(u,self.state):
+        if any(
+            [
+                u.handover_start_detected,
+                u.handover_finished,
+                u.object_in_bowl,
+                u.new_arm_location,
+            ]
+        ):
+            for (
+                src,
+                guard,
+                dst,
+                new_arm_prog,
+                new_gaze_prog,
+            ) in self.handover_transitions:
+                if self.state.current_handover_state == src and guard(u, self.state):
                     self.state.current_handover_state = dst
                     changes.handover_state = dst
                     if new_arm_prog is not None:
@@ -435,17 +457,30 @@ class StateMachine:
             if u.new_arm_location:
                 self.state.last_arm_location = u.new_arm_location
             if not self.dynamic_gaze and changes.handover_state:
-                self.state.current_gaze_program = self.static_gaze_map[changes.handover_state]
+                self.state.current_gaze_program = self.static_gaze_map[
+                    changes.handover_state
+                ]
                 changes.gaze_program = self.state.current_gaze_program
             if u.handover_start_detected and changes.handover_state == None:
                 self.state.initiated_handover_waiting = u.handover_start_detected
 
-        if self.dynamic_gaze and any([u.new_gaze_target,u.gaze_program_finished]) and is_time_difference_exceeded(self.state.last_gaze_update, GAZE_UPDATE_REFRESH_RATE_MS):
-            for curr_hs, curr_gaze_prog, guard, gaze_dst in self.dynamic_gaze_transitions:
+        if (
+            self.dynamic_gaze
+            and any([u.new_gaze_target, u.gaze_program_finished])
+            and is_time_difference_exceeded(
+                self.state.last_gaze_update, GAZE_UPDATE_REFRESH_RATE_MS
+            )
+        ):
+            for (
+                curr_hs,
+                curr_gaze_prog,
+                guard,
+                gaze_dst,
+            ) in self.dynamic_gaze_transitions:
                 if (
-                    self.state.current_handover_state == curr_hs and 
-                    self.state.current_gaze_program == curr_gaze_prog
-                    and guard(u,self.state)
+                    self.state.current_handover_state == curr_hs
+                    and self.state.current_gaze_program == curr_gaze_prog
+                    and guard(u, self.state)
                 ):
                     self.state.current_gaze_program = gaze_dst
                     changes.gaze_program = gaze_dst
