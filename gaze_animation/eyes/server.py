@@ -101,7 +101,7 @@ def move():
         x = float(data.get("x"))
         y = float(data.get("y"))
         duration = float(data.get("duration", 0.1))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError) as e:
         return jsonify({"error": "Invalid input"}), 400
 
     with animation_lock:
