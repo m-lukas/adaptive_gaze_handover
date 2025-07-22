@@ -23,16 +23,16 @@ v = cv2.VideoCapture(0)
 
 gaze_calibration_vectors = {
     "robot_face": [],
-    "pose1": [],
-    "pose2": [],
-    "own_items": [],
+    "packaging_area": [],
+    "left_handover_location": [],
+    "right_handover_location": [],
 }
 
 mean_fixation_vectors = {
     "robot_face": None,
-    "pose1": None,
-    "pose2": None,
-    "own_items": None,
+    "packaging_area": None,
+    "left_handover_location": None,
+    "right_handover_location": None,
 }
 
 
@@ -81,9 +81,9 @@ def find_closest_fixation(current_gaze_vector: np.ndarray) -> str:
     
     print({
         "robot_face": distances[0],
-        "pose1": distances[1],
-        "pose2": distances[2],
-        "own_items": distances[3],
+        "packaging_area": distances[1],
+        "left_handover_location": distances[2],
+        "right_handover_location": distances[3],
     })
 
     most_similar_index = np.argmin(distances)
@@ -108,22 +108,9 @@ def calculate_mean_fixation_vectors() -> None:
         mean_fixation_vectors[target] = np.mean(gaze_calibration_vectors[target], axis=0)
 
 
-def trigger_gaze_animation(fixation: str):
-    if fixation == "robot_face":
-        x = 0
-        y = -0.3
-    elif fixation == "pose1":
-        x = -1
-        y = 0.6
-    elif fixation == "pose2":
-        x = 1
-        y = 0.6
-    elif fixation == "own_items":
-        x = 0
-        y = 1
-
+def send_gaze_target(fixation: str):
     url = "http://127.0.0.1:5000/move"
-    payload = {"x": x, "y": y, "duration": 1}
+    payload = {"fixation": fixation}
     headers = {
     'Content-Type': 'application/json'
     }
@@ -135,14 +122,14 @@ def trigger_gaze_animation(fixation: str):
 input("Press ENTER to capture Robot Face ...")
 calibration_loop("robot_face")
 
-input("Press ENTER to capture Pose1 ...")
-calibration_loop("pose1")
+input("Press ENTER to capture Packaging Area ...")
+calibration_loop("packaging_area")
 
-input("Press ENTER to capture Pose2 ...")
-calibration_loop("pose2")
+input("Press ENTER to capture Left Handover Location ...")
+calibration_loop("left_handover_location")
 
-input("Press ENTER to capture Own Items ...")
-calibration_loop("own_items")
+input("Press ENTER to capture Right Handover Location ...")
+calibration_loop( "right_handover_location")
 
 print("DONE ...")
 
@@ -151,9 +138,9 @@ calculate_mean_fixation_vectors()
 
 
 print("[Robot Face] Mean Fixation Vector:", str(mean_fixation_vectors["robot_face"]))
-print("[Pose1] Mean Fixation Vector:", str(mean_fixation_vectors["pose1"]))
-print("[Pose2] Mean Fixation Vector:", str(mean_fixation_vectors["pose2"]))
-print("[Own Items] Mean Fixation Vector:", str(mean_fixation_vectors["own_items"]))
+print("[Packaging Area] Mean Fixation Vector:", str(mean_fixation_vectors["packaging_area"]))
+print("[Left Handover Location] Mean Fixation Vector:", str(mean_fixation_vectors["left_handover_location"]))
+print("[Right Handover Location] Mean Fixation Vector:", str(mean_fixation_vectors["right_handover_location"]))
 
 print("\n\n")
 input("Press ENTER to start recording ...")
@@ -180,22 +167,14 @@ while v.isOpened():
             )
 
             fixation = find_closest_fixation(face.gaze_vector)
-            if fixation == "robot_face":
-                text = "Robot Face"
-            elif fixation == "pose1":
-                text = "Pose 1"
-            elif fixation == "pose2":
-                text = "Pose 2"
-            elif fixation == "own_items":
-                text = "Own items"
 
             cv2.putText(
-                frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2
+                frame, fixation, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (147, 58, 31), 2
             )
 
             stable_fixation = filter.update_gaze(fixation)
             if stable_fixation:
-                trigger_gaze_animation(fixation)
+                send_gaze_target(fixation)
 
         cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
