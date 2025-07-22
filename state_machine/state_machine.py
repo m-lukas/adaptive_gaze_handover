@@ -40,9 +40,7 @@ class GazeTarget(Enum):
 
 
 class ArmLocation(Enum):
-    MOVING_TO_PERSON = "moving_to_person"
     HANDOVER_LOCATION = "handover_location"
-    MOVING_TO_PACKAGING = "moving_to_packaging"
     PACKAGING = "packaging"
     IDLE = "idle"
 
