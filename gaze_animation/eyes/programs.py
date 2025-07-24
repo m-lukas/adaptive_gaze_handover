@@ -102,7 +102,7 @@ programs = {
     ),
     "move_to_packaging_left": GazeProgram(
         saccades=[
-            TargetTransition(left_handover, 0.1),
+            TargetTransition(left_handover, 0),
             TargetTransition(packaging_common, 2.5, EaseFunction.SMOOTHSTEP),
         ],
     ),

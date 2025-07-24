@@ -16,13 +16,11 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("LARO")
 
 # Farben definieren
-#BG = (35.7, 70.2, 74.9)
 BG = (135, 135, 135)
 MOUTH = (53, 71, 73)
 LID = (4.5, 37.1, 44.1)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-SKIN = (240, 200, 170)
 
 # Variablen fuer die Augenposition und Blickrichtung
 eye_radius = 200
