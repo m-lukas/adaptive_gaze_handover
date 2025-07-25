@@ -28,10 +28,12 @@ async def update_gaze_target(data: GazeTargetPayload, bg: BackgroundTasks):
 async def trigger_event(data: EventPayload, bg: BackgroundTasks):
     if data.name == "handover_start_detected_left":
         upd = StateUpdate(handover_start_detected=HandoverInitiatedTray.LEFT)
-    elif data.name == "handover_start_detected_left":
+    elif data.name == "handover_start_detected_right":
         upd = StateUpdate(handover_start_detected=HandoverInitiatedTray.RIGHT)
     elif data.name == "object_in_bowl":
         upd = StateUpdate(object_in_bowl=True)
+    elif data.name == "gaze_program_finished":
+        upd = StateUpdate(gaze_program_finished=True)
     else:
         raise HTTPException(status_code=400, detail="unknown event")
     bg.add_task(_process_update, upd)

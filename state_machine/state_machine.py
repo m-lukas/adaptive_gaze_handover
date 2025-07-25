@@ -11,7 +11,7 @@ GAZE_UPDATE_REFRESH_RATE_MS = 1000
 class GazeProgram(Enum):
     IDLE = "idle"
     MOVE_TO_PERSON_LEFT = "move_to_person_left"
-    MOVE_TO_PERSON_RIGHT = "move_to_person_left"
+    MOVE_TO_PERSON_RIGHT = "move_to_person_right"
     RECEIVING_LEFT = "receiving_left"
     RECEIVING_RIGHT = "receiving_right"
     MOVE_TO_PACKAGING_LEFT = "move_to_packaging_left"
@@ -419,9 +419,12 @@ class StateMachine:
         # static gaze simply maps handover states → gaze program
         self.static_gaze_map = {
             HandoverState.NO_ACTIVE_HANDOVER: GazeProgram.IDLE,
-            HandoverState.MOVING_TO_PERSON: GazeProgram.MOVE_TO_PERSON,
-            HandoverState.WAITING_FOR_RECEIVAL: GazeProgram.RECEIVING,
-            HandoverState.MOVING_TO_PACKAGING: GazeProgram.MOVE_TO_PACKAGING,
+            HandoverState.MOVING_TO_PERSON_LEFT: GazeProgram.MOVE_TO_PERSON_LEFT,
+            HandoverState.MOVING_TO_PERSON_RIGHT: GazeProgram.MOVE_TO_PERSON_RIGHT,
+            HandoverState.WAITING_FOR_RECEIVAL_LEFT: GazeProgram.RECEIVING_LEFT,
+            HandoverState.WAITING_FOR_RECEIVAL_RIGHT: GazeProgram.RECEIVING_RIGHT,
+            HandoverState.MOVING_TO_PACKAGING_LEFT: GazeProgram.MOVE_TO_PACKAGING_LEFT,
+            HandoverState.MOVING_TO_PACKAGING_RIGHT: GazeProgram.MOVE_TO_PACKAGING_RIGHT,
             HandoverState.PACKAGING: GazeProgram.ENSURING,
         }
 
