@@ -26,9 +26,10 @@ async def update_gaze_target(data: GazeTargetPayload, bg: BackgroundTasks):
 
 @app.post("/event", status_code=202)
 async def trigger_event(data: EventPayload, bg: BackgroundTasks):
-    if data.name == "handover_start_detected":
-        # if you need LEFT vs RIGHT, use another endpoint or extend here
+    if data.name == "handover_start_detected_left":
         upd = StateUpdate(handover_start_detected=HandoverInitiatedTray.LEFT)
+    elif data.name == "handover_start_detected_left":
+        upd = StateUpdate(handover_start_detected=HandoverInitiatedTray.RIGHT)
     elif data.name == "object_in_bowl":
         upd = StateUpdate(object_in_bowl=True)
     else:
