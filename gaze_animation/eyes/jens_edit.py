@@ -2,6 +2,7 @@ import random
 import sys
 import time
 from math import pi as PI
+import math
 
 import numpy as np
 import pygame
@@ -15,12 +16,11 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("LARO")
 
 # Farben definieren
-BG = (35.7, 70.2, 74.9)
-MOUTH = (73.5, 91.5, 93.5)
-LID = (14.5, 47.1, 54.1)
+BG = (135, 135, 135)
+MOUTH = (53, 71, 73)
+LID = (4.5, 37.1, 44.1)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-SKIN = (240, 200, 170)
 
 # Variablen fuer die Augenposition und Blickrichtung
 eye_radius = 200
@@ -65,11 +65,35 @@ looking_right = False
 
 movements_index = 0
 
-font = pygame.font.SysFont(None, 32)  # You can specify font name instead of None
-
 
 def looking_straight():
     return not any([looking_up, looking_down, looking_left, looking_right])
+
+
+def draw_solid_arc(surface, color, rect, start_angle, stop_angle, width, segments=40):
+    cx, cy = rect.center
+    rx, ry = rect.width/2, rect.height/2
+    inner_rx = rx - width
+    inner_ry = ry - width
+
+    # Build outer arc points from start → stop
+    outer = []
+    for i in range(segments+1):
+        theta = start_angle + (stop_angle - start_angle) * (i/segments)
+        x = cx + rx * math.cos(theta)
+        y = cy + ry * math.sin(theta)
+        outer.append((x,y))
+
+    # Build inner arc back from stop → start
+    inner = []
+    for i in range(segments+1):
+        theta = stop_angle - (stop_angle - start_angle) * (i/segments)
+        x = cx + inner_rx * math.cos(theta)
+        y = cy + inner_ry * math.sin(theta)
+        inner.append((x,y))
+
+    pts = outer + inner
+    pygame.draw.polygon(surface, color, pts)
 
 
 def draw_brows():
@@ -124,19 +148,10 @@ def draw_brows():
 
 
 def draw_mouth():
-    MOUTH_RECT = pygame.Rect((WIDTH / 2 - 100, HEIGHT * 0.65), (200, 100))
-    start_angle = PI
-    stop_angle = 0
-    width = 15
-    radius = width // 2
+    MOUTH_RECT = pygame.Rect((WIDTH/2 - 100, HEIGHT * 0.65), (200, 100))
+    # draw a solid smile from π to 0, thickness 15px
+    draw_solid_arc(screen, MOUTH, MOUTH_RECT, math.pi, 0, 15, segments=120)
 
-    pygame.draw.arc(screen, MOUTH, MOUTH_RECT, start_angle, stop_angle, width)
-
-    # round corners
-    start_pos = (MOUTH_RECT.left + radius, MOUTH_RECT.centery)
-    end_pos = (MOUTH_RECT.right - radius, MOUTH_RECT.centery)
-    pygame.draw.circle(screen, MOUTH, start_pos, radius)
-    pygame.draw.circle(screen, MOUTH, end_pos, radius)
 
 
 def draw_eyes():
@@ -247,26 +262,26 @@ def draw_eyes():
         right_pupil_pos[1] + pupil_offset[1],
     )
 
-    if (looking_down or looking_up) and (looking_left or looking_right):
-        left_mini_pupil_pos = (
-            left_pupil_pos[0] + 0.71 * pupil_offset[0] / 2,
-            left_pupil_pos[1] + 0.71 * pupil_offset[1],
-        )
-        right_mini_pupil_pos = (
-            right_pupil_pos[0] + 0.71 * pupil_offset[0] / 2,
-            right_pupil_pos[1] + 0.71 * pupil_offset[1],
-        )
+    #if (looking_down or looking_up) and (looking_left or looking_right):
+    left_mini_pupil_pos = (
+        left_pupil_pos[0] + 0.71 * pupil_offset[0] / 2,
+        left_pupil_pos[1] + 0.71 * pupil_offset[1],
+    )
+    right_mini_pupil_pos = (
+        right_pupil_pos[0] + 0.71 * pupil_offset[0] / 2,
+        right_pupil_pos[1] + 0.71 * pupil_offset[1],
+    )
 
     # Randomize Richtung von Mini-Pupille wenn augen geradeaus
-    if looking_straight():
-        left_mini_pupil_pos = (
-            left_pupil_pos[0] + 0.1 * last_pupil_offset[0] / 2,
-            left_pupil_pos[1] + 0.1 * last_pupil_offset[1],
-        )
-        right_mini_pupil_pos = (
-            right_pupil_pos[0] + 0.1 * last_pupil_offset[0] / 2,
-            right_pupil_pos[1] + 0.1 * last_pupil_offset[1],
-        )
+    # if looking_straight():
+    #     left_mini_pupil_pos = (
+    #         left_pupil_pos[0] + 0.1 * last_pupil_offset[0] / 2,
+    #         left_pupil_pos[1] + 0.1 * last_pupil_offset[1],
+    #     )
+    #     right_mini_pupil_pos = (
+    #         right_pupil_pos[0] + 0.1 * last_pupil_offset[0] / 2,
+    #         right_pupil_pos[1] + 0.1 * last_pupil_offset[1],
+    #     )
 
     pygame.draw.circle(screen, WHITE, left_mini_pupil_pos, pupil_radius / 5)
     pygame.draw.circle(screen, WHITE, right_mini_pupil_pos, pupil_radius / 5)
@@ -286,11 +301,6 @@ def animate_gaze(coordinates):
     pupil_offset[1] = coordinates[1] * max_pupil_offsets[1]
 
     screen.fill(BG)
-    # Set up text
-    text = f"{coordinates[0]}|{coordinates[1]}|{movements_index}"
-    text_color = (255, 255, 255)  # White color
-    text_surface = font.render(text, True, text_color)
-    screen.blit(text_surface, (10, 10))
 
     # Zwinker-Logik Start
     if not is_blinking and current_time - blink_timer > blink_interval:
