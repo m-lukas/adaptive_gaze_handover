@@ -34,6 +34,8 @@ async def trigger_event(data: EventPayload, bg: BackgroundTasks):
         upd = StateUpdate(object_in_bowl=True)
     elif data.name == "gaze_program_finished":
         upd = StateUpdate(gaze_program_finished=True)
+    elif data.name == "handover_finished":
+        upd = StateUpdate(handover_finished=True)
     else:
         raise HTTPException(status_code=400, detail="unknown event")
     bg.add_task(_process_update, upd)
@@ -42,12 +44,6 @@ async def trigger_event(data: EventPayload, bg: BackgroundTasks):
 @app.post("/arm_location", status_code=202)
 async def update_arm_location(data: ArmLocationPayload, bg: BackgroundTasks):
     upd = StateUpdate(new_arm_location=data.location)
-    bg.add_task(_process_update, upd)
-    return {"status": "accepted"}
-
-@app.post("/handover_finished", status_code=202)
-async def update_handover_finished(bg: BackgroundTasks):
-    upd = StateUpdate(handover_finished=True)
     bg.add_task(_process_update, upd)
     return {"status": "accepted"}
 
