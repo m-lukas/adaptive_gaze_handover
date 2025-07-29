@@ -9,9 +9,9 @@ import pygame
 pygame.init()
 
 WIDTH = 1024
-HEIGHT = 600
+HEIGHT = 768
 TICKS_PER_SECOND = 60
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("LARO")
 
 # Farben definieren
