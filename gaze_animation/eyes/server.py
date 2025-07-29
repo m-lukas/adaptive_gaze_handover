@@ -15,9 +15,9 @@ from programs import GazeProgram, Transition, programs
 pygame.init()
 
 WIDTH = 1024
-HEIGHT = 600
+HEIGHT = 768
 TICKS_PER_SECOND = 60
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("LARO")
 
 # Farben definieren
@@ -356,7 +356,7 @@ def animate_gaze(coordinates):
 
 
 def run_flask():
-    app.run(port=5000)
+    app.run(port=2222)
 
 
 # ------------------------------
