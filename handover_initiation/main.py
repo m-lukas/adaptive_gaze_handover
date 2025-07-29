@@ -11,9 +11,9 @@ AWAITING_SPACE = 1
 
 def send_signal(event: str):
     """Sends the triggered event to the server."""
-    print("Triggered:", action)
+    print("Triggered:", event)
     try:
-        resp = requests.post(server_url, json={'event': event}, timeout=0.5)
+        resp = requests.post(SERVER_URL, json={'event': event}, timeout=0.5)
         resp.raise_for_status()
     except Exception as e:
         print(f"Failed to send '{event}' to server - Error: {e}")
