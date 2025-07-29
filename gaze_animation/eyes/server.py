@@ -71,7 +71,7 @@ movements_index = 0
 app = Flask(__name__)
 
 animation_lock = threading.Lock()
-current_command = {"program": programs["move_to_packaging_left"], "elapsed": 0, "current_pos": [0, 0]}
+current_command = {"program": programs["idle"], "elapsed": 0, "current_pos": [0, 0]}
 
 
 @app.route("/trigger", methods=["POST"])

@@ -49,7 +49,7 @@ class ArmProgram(Enum):
     MOVE_TO_LEFT_HANDOVER = "move_to_left_tray"
     MOVE_TO_RIGHT_HANDOVER = "move_to_right_tray"
     MOVE_TO_PACKAGING = "move_to_packaging"
-    IDLE = "idle"
+    IDLE = "move_to_idle"
 
 
 class HandoverState(Enum):
