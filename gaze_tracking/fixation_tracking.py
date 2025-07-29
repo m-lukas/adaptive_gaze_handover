@@ -109,8 +109,8 @@ def calculate_mean_fixation_vectors() -> None:
 
 
 def send_gaze_target(fixation: str):
-    url = "http://127.0.0.1:5000/move"
-    payload = {"fixation": fixation}
+    url = "http://0.0.0.0:1111/gaze_target"
+    payload = {"target": fixation}
     headers = {
     'Content-Type': 'application/json'
     }
