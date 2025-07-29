@@ -1,21 +1,16 @@
 [tool.poetry]
-name = "eyes"
+name = "gaze-tracking"
 version = "0.1.0"
 description = ""
-authors = ["m-lukas <mail@lukasmueller.de>"]
+authors = ["Lukas Mueller <mail@lukasmueller.de>"]
 readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
-black = "^24.10.0"
-isort = "^5.13.2"
-pygame = "^2.6.1"
-numpy = "^2.2.6"
-flask = "^3.1.1"
+python = "^3.10"
+opencv-python = "^4.12.0.88"
+pygaze = "^1.2.2"
 
-[tool.isort]
-profile = "black"
 
 [build-system]
 requires = ["poetry-core"]

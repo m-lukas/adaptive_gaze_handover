@@ -4,13 +4,10 @@ Python Version: 3.10
 
 ## Installation (Poetry)
 
-1. `poetry shell`
-2. `poetry install`
-
-## Installation (venv)
-
-1. `source .venv/bin/activate`
-2. `pip install pygaze`
+1. Make sure to have Python 3.10 installed
+2. `poetry env use 3.10`
+3. `poetry shell`
+4. `poetry install`
 
 ## Running
 
