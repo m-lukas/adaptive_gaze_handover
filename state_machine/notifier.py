@@ -10,7 +10,7 @@ def notify_arm_program(prog: ArmProgram):
         print("To Robot Controller:", "{'program':", prog.value, "}")
     except Exception as e:
         print("ERROR while sending data to robot controller: ", str(e))
-        pass  # log or retry as you wish
+        pass
 
 def notify_gaze_program(prog: GazeProgram):
     try:
