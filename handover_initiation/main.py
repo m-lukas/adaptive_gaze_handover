@@ -3,25 +3,23 @@ import sys
 import requests
 import pygame
 
-SERVER_URL = ""
+SERVER_URL = "http://0.0.0.0:1111/event"
 
 # States
 READY_FOR_ARROW = 0
 AWAITING_SPACE = 1
 
-def send_signal(action: str):
-    """POSTs the given action to the server."""
-    print(action)
-    # try:
-    #     resp = requests.post(server_url, json={'action': action}, timeout=2.0)
-    #     resp.raise_for_status()
-    #     print(f"→ Sent '{action}'")
-    # except Exception as e:
-    #     print(f"‼️  Failed to send '{action}': {e}")
+def send_signal(event: str):
+    """Sends the triggered event to the server."""
+    print("Triggered:", action)
+    try:
+        resp = requests.post(server_url, json={'event': event}, timeout=0.5)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"Failed to send '{event}' to server - Error: {e}")
 
 def main():
-    print("Handover client started.")
-    print("← = left_tray, → = right_tray, space = object_in_bowl, ESC = quit\n")
+    print("left arrow = left_tray, right arrow = right_tray, space = object_in_bowl, ESC = quit\n")
 
     # pygame in headless mode
     pygame.init()
@@ -43,22 +41,20 @@ def main():
                     running = False
 
                 elif event.key == pygame.K_LEFT and state == READY_FOR_ARROW:
-                    send_signal('left_tray')
+                    send_signal("handover_start_detected_left")
                     state = AWAITING_SPACE
 
                 elif event.key == pygame.K_RIGHT and state == READY_FOR_ARROW:
-                    send_signal('right_tray')
+                    send_signal("handover_start_detected_right")
                     state = AWAITING_SPACE
 
                 elif event.key == pygame.K_SPACE and state == AWAITING_SPACE:
-                    send_signal('object_in_bowl')
+                    send_signal("object_in_bowl")
                     state = READY_FOR_ARROW
 
-        # cap the loop to 30fps to reduce CPU usage
         clock.tick(30)
 
     pygame.quits()
-    print("Exited.")
 
 if __name__ == '__main__':
     main()
