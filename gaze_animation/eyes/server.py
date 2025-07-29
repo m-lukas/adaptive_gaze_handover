@@ -7,6 +7,7 @@ import time
 from math import pi as PI
 
 import numpy as np
+from notifier import notify_gaze_program_finished
 import pygame
 from flask import Flask, jsonify, request
 
@@ -415,6 +416,7 @@ while running:
                     program.start_pos = current_command["current_pos"][:]
                     program.index += 1
                 else:
+                    notify_gaze_program_finished()
                     current_command["program"] = None
 
     animate_gaze(current_command["current_pos"])
