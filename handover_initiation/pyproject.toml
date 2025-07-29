@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "handover-initiation"
+version = "0.1.0"
+description = ""
+authors = ["m-lukas <mail@lukasmueller.de>"]
+readme = "README.md"
+packages = [{include = "handover_initiation"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.4"
+keyboard = "^0.13.5"
+pygame = "^2.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
