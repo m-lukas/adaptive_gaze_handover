@@ -103,9 +103,12 @@ class DataLogger:
                 writer.writerow(line)
 
     def write_files(self) -> None:
+        print("DataLogger: Logging Data")
         if self.handover_timings:
             self.__write_file(self.__get_handover_data(), "handover")
+            print("DataLogger: Logged Handover Data")
         if self.gaze_target_timings:
             self.__write_file(self.__get_gaze_data(), "gaze")
+            print("DataLogger: Logged Gaze Data")
         #self.__write_file(self.__get_analysis_data(), "analysis")
         

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from fsm import (
@@ -11,6 +12,11 @@ app = FastAPI()
 sm = StateMachine(dynamic_gaze=True)
 
 logger = DataLogger(demonstration=True, file_name="X3ET9")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    logger.write_files()
 
 class GazeTargetPayload(BaseModel):
     target: GazeTarget
