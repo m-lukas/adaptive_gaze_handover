@@ -7,7 +7,7 @@ import time
 from math import pi as PI
 
 import numpy as np
-from notifier import notify_gaze_program_finished
+from notifier import notify_gaze_program_finished, notify_keyboard_event
 import pygame
 from flask import Flask, jsonify, request
 
@@ -366,6 +366,11 @@ def run_flask():
 flask_thread = threading.Thread(target=run_flask, daemon=True)
 flask_thread.start()
 
+# States
+READY_FOR_ARROW = 0
+AWAITING_SPACE = 1
+
+state = READY_FOR_ARROW
 
 # Main loop
 base_interval = 3  # Mittelwert (in Sekunden)
@@ -382,6 +387,21 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+
+            elif event.key == pygame.K_LEFT and state == READY_FOR_ARROW:
+                notify_keyboard_event("handover_start_detected_left")
+                state = AWAITING_SPACE
+
+            elif event.key == pygame.K_RIGHT and state == READY_FOR_ARROW:
+                notify_keyboard_event("handover_start_detected_right")
+                state = AWAITING_SPACE
+
+            elif event.key == pygame.K_SPACE and state == AWAITING_SPACE:
+                notify_keyboard_event("object_in_bowl")
+                state = READY_FOR_ARROW
 
     dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
 
