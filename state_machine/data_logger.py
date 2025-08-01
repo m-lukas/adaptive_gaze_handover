@@ -49,12 +49,16 @@ class DataLogger:
         data = [["identifier", "initiation", "object_in_bowl", "init_to_bowl_duration", "error", "bowl_to_bowl_duration", "full_duration"]]
         for index, handover in enumerate(self.handover_timings):
             name = f"handover_{index+1}"
-            init_to_bowl_duration = (handover.object_in_bowl_timestamp-handover.initiation_timestamp).total_seconds() * 1000
+
+            init_to_bowl_duration = None
+            if handover.object_in_bowl_timestamp:
+                init_to_bowl_duration = (handover.object_in_bowl_timestamp-handover.initiation_timestamp).total_seconds() * 1000
 
             bowl_to_bowl_duration = None
-            if index > 0:
+            if index > 0 and handover.object_in_bowl_timestamp:
                 previous_object_in_bowl_timestamp = self.handover_timings[index-1].object_in_bowl_timestamp
-                bowl_to_bowl_duration = (handover.object_in_bowl_timestamp-previous_object_in_bowl_timestamp).total_seconds() * 1000
+                if previous_object_in_bowl_timestamp:
+                    bowl_to_bowl_duration = (handover.object_in_bowl_timestamp-previous_object_in_bowl_timestamp).total_seconds() * 1000
 
             next_initiation_timestamp = self.handover_finished_timestamp
             if index < len(self.handover_timings)-1:
@@ -66,7 +70,7 @@ class DataLogger:
                 [
                     name,
                     handover.initiation_timestamp.isoformat(),
-                    handover.object_in_bowl_timestamp.isoformat(),
+                    (handover.object_in_bowl_timestamp.isoformat() if handover.object_in_bowl_timestamp else None),
                     init_to_bowl_duration,
                     handover.error_occured,
                     bowl_to_bowl_duration,
@@ -85,9 +89,11 @@ class DataLogger:
                 duration = (next_start_time-gaze_target.start_timestamp).total_seconds() * 1000
 
             data.append(
-                gaze_target.gaze_target,
-                gaze_target.start_timestamp,
-                duration
+                [
+                    gaze_target.gaze_target,
+                    gaze_target.start_timestamp,
+                    duration
+                ]
             )
 
         return data
