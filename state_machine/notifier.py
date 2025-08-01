@@ -1,5 +1,5 @@
 import requests
-from state_machine import ArmProgram, GazeProgram
+from fsm import ArmProgram, GazeProgram
 
 ROBOT_CONTROLLER_URL = "http://0.0.0.0:3333/start"
 GAZE_ANIMATION_URL   = "http://0.0.0.0:2222/trigger"
