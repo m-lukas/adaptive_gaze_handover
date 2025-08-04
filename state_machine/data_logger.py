@@ -1,9 +1,10 @@
 import csv
 from datetime import datetime
+import os
 from typing import List
 
 
-OUTPUT_DIRECTORY = "output"
+OUTPUT_DIRECTORY = "./output"
 
 
 class HandoverTimings:
@@ -28,6 +29,8 @@ class DataLogger:
         self.handover_timings: List[HandoverTimings] = []
 
         self.handover_finished_timestamp: datetime | None = None
+
+        self.setup()
 
     def log_gaze_target(self, gaze_target: str) -> None:
         self.gaze_target_timings.append(GazeTargetTiming(gaze_target))
@@ -119,4 +122,7 @@ class DataLogger:
             self.__write_file(self.__get_gaze_data(), "gaze")
             print("DataLogger: Logged Gaze Data")
         #self.__write_file(self.__get_analysis_data(), "analysis")
+
+    def setup(self):
+        os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
         
