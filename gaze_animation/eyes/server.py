@@ -403,7 +403,7 @@ while running:
                 notify_keyboard_event("object_in_bowl")
                 state = READY_FOR_ARROW
 
-            elif event.key == pygame.K_DELETE and state == AWAITING_SPACE_OR_ERROR:
+            elif event.key == pygame.K_CLEAR and state == AWAITING_SPACE_OR_ERROR:
                 notify_keyboard_event("error_during_handover")
                 state = READY_FOR_ARROW
 
