@@ -3,6 +3,7 @@ import sys
 import time
 from typing import List
 
+import requests
 import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -109,13 +110,12 @@ def calculate_mean_fixation_vectors() -> None:
 
 
 def send_gaze_target(fixation: str):
-    print(f"Triggered gaze change: {fixation}")
-    # payload = {"target": fixation}
-    # headers = {
-    # 'Content-Type': 'application/json'
-    # }
+    payload = {"target": fixation}
+    headers = {
+    'Content-Type': 'application/json'
+    }
 
-    # requests.request("POST", STATE_MACHINE_URL, headers=headers, json=payload, timeout=0.2)
+    requests.request("POST", STATE_MACHINE_URL, headers=headers, json=payload, timeout=0.2)
 
 
 input("Press ENTER to capture Robot Face ...")
