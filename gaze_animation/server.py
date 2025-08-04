@@ -85,6 +85,7 @@ def trigger():
         return jsonify({"error": "Invalid input"}), 400
 
     if name in programs:
+        notify_gaze_program_finished()
         program = copy.copy(programs[name])
         with animation_lock:
             program.start_pos = current_command["current_pos"]
@@ -101,10 +102,11 @@ def move():
         x = float(data.get("x"))
         y = float(data.get("y"))
         duration = float(data.get("duration", 0.1))
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError):
         return jsonify({"error": "Invalid input"}), 400
 
     with animation_lock:
+        notify_gaze_program_finished()
         current_command.update(
             {
                 "program": GazeProgram(
