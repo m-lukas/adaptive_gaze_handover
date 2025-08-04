@@ -74,6 +74,7 @@ class StateUpdate:
         handover_start_detected: HandoverInitiatedTray | None = None,
         handover_finished: bool | None = None,
         object_in_bowl: bool | None = None,
+        error_during_handover: bool | None = None,
         new_arm_location: ArmLocation | None = None,
         gaze_program_finished: bool | None = None,
         new_gaze_target: GazeTarget | None = None,
@@ -81,6 +82,7 @@ class StateUpdate:
         self.handover_start_detected = handover_start_detected
         self.handover_finished = handover_finished
         self.object_in_bowl = object_in_bowl
+        self.error_during_handover = error_during_handover
         self.gaze_program_finished = gaze_program_finished
         self.new_arm_location = new_arm_location
         self.new_gaze_target = new_gaze_target

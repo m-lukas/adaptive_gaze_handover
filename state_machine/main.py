@@ -43,6 +43,9 @@ async def trigger_event(data: EventPayload, bg: BackgroundTasks):
     elif data.name == "object_in_bowl":
         logger.log_object_in_bowl()
         upd = StateUpdate(object_in_bowl=True)
+    elif data.name == "error_during_handover":
+        logger.log_handover_error()
+        upd = StateUpdate(error_during_handover=True)
     elif data.name == "gaze_program_finished":
         upd = StateUpdate(gaze_program_finished=True)
     elif data.name == "handover_finished":
