@@ -1,3 +1,5 @@
+import os
+import uuid
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from fsm import (
@@ -7,10 +9,14 @@ from fsm import (
 from notifier import notify_arm_program, notify_gaze_program
 from data_logger import DataLogger
 
+
+PARTICIPANT_IDENTIFIER=os.getenv("PARTICIPANT_IDENTIFIER", str(uuid.uuid4())) 
+
+
 app = FastAPI()
 sm = StateMachine(dynamic_gaze=True)
 
-logger = DataLogger(demonstration=True, file_name="X3ET9")
+logger = DataLogger(demonstration=True, file_name=PARTICIPANT_IDENTIFIER)
 
 @app.on_event("shutdown")
 def shutdown_event():
