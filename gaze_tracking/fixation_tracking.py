@@ -6,14 +6,14 @@ from typing import List
 import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-import math
-import requests
 
 import cv2
 from pygaze import PyGaze, PyGazeRenderer
 
 
-FIXATION_TIME_THRESHOLD = 0.5
+FIXATION_TIME_THRESHOLD = 0.3
+STATE_MACHINE_URL = "http://0.0.0.0:1111/gaze_target"
+SHOW_IMAGE = False
 
 
 pg = PyGaze(model_path="models/eth-xgaze_resnet18.pth")
@@ -109,14 +109,13 @@ def calculate_mean_fixation_vectors() -> None:
 
 
 def send_gaze_target(fixation: str):
-    url = "http://0.0.0.0:1111/gaze_target"
-    payload = {"target": fixation}
-    headers = {
-    'Content-Type': 'application/json'
-    }
+    print(f"Triggered gaze change: {fixation}")
+    # payload = {"target": fixation}
+    # headers = {
+    # 'Content-Type': 'application/json'
+    # }
 
-    requests.request("POST", url, headers=headers, json=payload)
-    print("Triggered gaze change.")
+    # requests.request("POST", STATE_MACHINE_URL, headers=headers, json=payload, timeout=0.2)
 
 
 input("Press ENTER to capture Robot Face ...")
@@ -176,7 +175,8 @@ while v.isOpened():
             if stable_fixation:
                 send_gaze_target(fixation)
 
-        cv2.imshow("frame", frame)
+        if SHOW_IMAGE:
+            cv2.imshow("frame", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
