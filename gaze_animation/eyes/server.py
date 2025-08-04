@@ -368,7 +368,7 @@ flask_thread.start()
 
 # States
 READY_FOR_ARROW = 0
-AWAITING_SPACE = 1
+AWAITING_SPACE_OR_ERROR = 1
 
 state = READY_FOR_ARROW
 
@@ -393,14 +393,18 @@ while running:
 
             elif event.key == pygame.K_LEFT and state == READY_FOR_ARROW:
                 notify_keyboard_event("handover_start_detected_left")
-                state = AWAITING_SPACE
+                state = AWAITING_SPACE_OR_ERROR
 
             elif event.key == pygame.K_RIGHT and state == READY_FOR_ARROW:
                 notify_keyboard_event("handover_start_detected_right")
-                state = AWAITING_SPACE
+                state = AWAITING_SPACE_OR_ERROR
 
-            elif event.key == pygame.K_SPACE and state == AWAITING_SPACE:
+            elif event.key == pygame.K_SPACE and state == AWAITING_SPACE_OR_ERROR:
                 notify_keyboard_event("object_in_bowl")
+                state = READY_FOR_ARROW
+
+            elif event.key == pygame.K_DELETE and state == AWAITING_SPACE_OR_ERROR:
+                notify_keyboard_event("error_during_handover")
                 state = READY_FOR_ARROW
 
     dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
