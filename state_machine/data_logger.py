@@ -64,7 +64,9 @@ class DataLogger:
             if index < len(self.handover_timings)-1:
                 next_initiation_timestamp = self.handover_timings[index+1].initiation_timestamp
 
-            full_duration = (next_initiation_timestamp-handover.initiation_timestamp).total_seconds() * 1000
+            full_duration = None
+            if next_initiation_timestamp:
+                full_duration = (next_initiation_timestamp-handover.initiation_timestamp).total_seconds() * 1000
             
             data.append(
                 [
