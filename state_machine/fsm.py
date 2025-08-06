@@ -5,7 +5,7 @@ from typing import Callable, List, Tuple
 from util import is_time_difference_exceeded
 
 
-GAZE_UPDATE_REFRESH_RATE_MS = 1000
+GAZE_UPDATE_REFRESH_RATE_MS = 500
 
 
 class GazeProgram(Enum):
@@ -459,15 +459,27 @@ class StateMachine:
                         self.state.current_gaze_program = new_gaze_prog
                         changes.gaze_program = new_gaze_prog
                     break
+
             if u.new_arm_location:
                 self.state.last_arm_location = u.new_arm_location
+
             if not self.dynamic_gaze and changes.handover_state:
                 self.state.current_gaze_program = self.static_gaze_map[
                     changes.handover_state
                 ]
                 changes.gaze_program = self.state.current_gaze_program
-            if u.handover_start_detected and changes.handover_state == None and self.state.last_arm_location == ArmLocation.PACKAGING:
+
+            if (
+                u.handover_start_detected and
+                changes.handover_state == None and
+                self.state.current_handover_state == HandoverState.PACKAGING
+            ):
                 self.state.initiated_handover_waiting = u.handover_start_detected
+
+            if (
+                changes.handover_state in [HandoverState.MOVING_TO_PERSON_LEFT, HandoverState.MOVING_TO_PERSON_RIGHT, HandoverState.NO_ACTIVE_HANDOVER]
+            ):
+                self.state.initiated_handover_waiting = None
 
         if (
             self.dynamic_gaze
