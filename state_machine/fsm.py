@@ -466,7 +466,7 @@ class StateMachine:
                     changes.handover_state
                 ]
                 changes.gaze_program = self.state.current_gaze_program
-            if u.handover_start_detected and changes.handover_state == None:
+            if u.handover_start_detected and changes.handover_state == None and self.state.last_arm_location == ArmLocation.PACKAGING:
                 self.state.initiated_handover_waiting = u.handover_start_detected
 
         if (
