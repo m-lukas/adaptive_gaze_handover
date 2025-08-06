@@ -212,7 +212,7 @@ class StateMachine:
                 lambda u, c: u.handover_finished == True
                 and c.initiated_handover_waiting == None,
                 HandoverState.NO_ACTIVE_HANDOVER,
-                ArmProgram.IDLE,
+                None,
                 GazeProgram.MUTUAL,
             ),
             (
