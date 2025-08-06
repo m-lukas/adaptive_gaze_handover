@@ -14,7 +14,7 @@ from pygaze import PyGaze, PyGazeRenderer
 
 FIXATION_TIME_THRESHOLD = 0.3
 STATE_MACHINE_URL = "http://0.0.0.0:1111/gaze_target"
-SHOW_IMAGE = False
+SHOW_IMAGE = True
 
 
 pg = PyGaze(model_path="models/eth-xgaze_resnet18.pth")
@@ -115,7 +115,12 @@ def send_gaze_target(fixation: str):
     'Content-Type': 'application/json'
     }
 
-    requests.request("POST", STATE_MACHINE_URL, headers=headers, json=payload, timeout=0.2)
+    try:
+        resp = requests.request("POST", STATE_MACHINE_URL, headers=headers, json=payload, timeout=0.2)
+        resp.raise_for_status()
+    except Exception as e:
+        print("ERROR while sending data to state_machine: ", str(e))
+        pass
 
 
 input("Press ENTER to capture Robot Face ...")
