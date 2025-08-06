@@ -78,6 +78,7 @@ class StateUpdate:
         new_arm_location: ArmLocation | None = None,
         gaze_program_finished: bool | None = None,
         new_gaze_target: GazeTarget | None = None,
+        task_completed: bool | None = None,
     ):
         self.handover_start_detected = handover_start_detected
         self.handover_finished = handover_finished
@@ -86,6 +87,7 @@ class StateUpdate:
         self.gaze_program_finished = gaze_program_finished
         self.new_arm_location = new_arm_location
         self.new_gaze_target = new_gaze_target
+        self.task_completed = task_completed
 
 
 class CurrentState:

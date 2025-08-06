@@ -52,11 +52,13 @@ async def trigger_event(data: EventPayload, bg: BackgroundTasks):
     elif data.name == "error_during_handover":
         logger.log_handover_error()
         upd = StateUpdate(error_during_handover=True)
+    elif data.name == "handover_finished":
+        upd = StateUpdate(handover_finished=True)
     elif data.name == "gaze_program_finished":
         upd = StateUpdate(gaze_program_finished=True)
-    elif data.name == "handover_finished":
-        logger.log_handover_finished()
-        upd = StateUpdate(handover_finished=True)
+    elif data.name == "task_completed":
+        logger.log_task_completed()
+        upd = StateUpdate(task_completed=True)
     else:
         raise HTTPException(status_code=400, detail="unknown event")
     bg.add_task(_process_update, upd)

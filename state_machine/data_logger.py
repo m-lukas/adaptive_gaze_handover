@@ -28,7 +28,7 @@ class DataLogger:
 
         self.handover_timings: List[HandoverTimings] = []
 
-        self.handover_finished_timestamp: datetime | None = None
+        self.task_completed_timestamp: datetime | None = None
 
         self.setup()
 
@@ -45,8 +45,8 @@ class DataLogger:
     def log_handover_error(self) -> None:
         self.handover_timings[len(self.handover_timings)-1].error_occured = True
 
-    def log_handover_finished(self) -> None:
-        self.handover_finished_timestamp = datetime.now()
+    def log_task_completed(self) -> None:
+        self.task_completed_timestamp = datetime.now()
 
     def __get_handover_data(self) -> List[tuple]:
         data = [["identifier", "initiation", "object_in_bowl", "init_to_bowl_duration", "error", "bowl_to_bowl_duration", "full_duration"]]
@@ -63,7 +63,7 @@ class DataLogger:
                 if previous_object_in_bowl_timestamp:
                     bowl_to_bowl_duration = (handover.object_in_bowl_timestamp-previous_object_in_bowl_timestamp).total_seconds() * 1000
 
-            next_initiation_timestamp = self.handover_finished_timestamp
+            next_initiation_timestamp = self.task_completed_timestamp
             if index < len(self.handover_timings)-1:
                 next_initiation_timestamp = self.handover_timings[index+1].initiation_timestamp
 
