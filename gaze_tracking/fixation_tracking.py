@@ -14,12 +14,12 @@ from pygaze import PyGaze, PyGazeRenderer
 
 FIXATION_TIME_THRESHOLD = 0.3
 STATE_MACHINE_URL = "http://0.0.0.0:1111/gaze_target"
-SHOW_IMAGE = True
+SHOW_IMAGE = False
 
 
 pg = PyGaze(model_path="models/eth-xgaze_resnet18.pth")
 pgren = PyGazeRenderer()
-v = cv2.VideoCapture(0)
+v = cv2.VideoCapture(2)
 
 
 gaze_calibration_vectors = {
