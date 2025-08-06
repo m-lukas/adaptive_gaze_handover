@@ -12,7 +12,7 @@ from pygaze import PyGaze, PyGazeRenderer
 
 pg = PyGaze(model_path="models/eth-xgaze_resnet18.pth")
 pgren = PyGazeRenderer()
-v = cv2.VideoCapture(2)
+v = cv2.VideoCapture(0)
 
 while v.isOpened():
     ret, frame = v.read()

@@ -59,7 +59,7 @@ class GazeDetectionFilter:
         return None
 
 
-def calibration_loop(target: str, num_frames: int = 100):
+def calibration_loop(target: str, num_frames: int = 50):
     counter = 0
     while counter < num_frames:
         ret, frame = v.read()
@@ -70,7 +70,8 @@ def calibration_loop(target: str, num_frames: int = 100):
                     [gaze_result[0].gaze_vector[0], gaze_result[0].gaze_vector[1]]
                 )
 
-        counter += 1
+                print("Recorded Gaze Vector:", gaze_result[0].gaze_vector[0], gaze_result[0].gaze_vector[1])
+                counter += 1
 
 
 def find_closest_fixation(current_gaze_vector: np.ndarray) -> str:
