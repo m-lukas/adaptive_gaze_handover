@@ -21,8 +21,8 @@ class GazeTargetTiming:
 
 
 class DataLogger:
-    def __init__(self, demonstration: bool, file_name: str):
-        self.file_name = (file_name if not demonstration else f"{file_name}_demo")
+    def __init__(self, participant_identifier: str, dynamic_gaze: bool, demonstration: bool):
+        self.file_name = self.create_base_file_name(participant_identifier, dynamic_gaze, demonstration)
 
         self.gaze_target_timings: List[GazeTargetTiming] = []
 
@@ -31,6 +31,19 @@ class DataLogger:
         self.task_completed_timestamp: datetime | None = None
 
         self.setup()
+
+    def create_base_file_name(self, participant_identifier: str, dynamic_gaze: bool, demonstration: bool) -> str:
+        base_file_name = participant_identifier
+
+        if dynamic_gaze:
+            base_file_name += "_dynamic"
+        else:
+            base_file_name += "_static"
+
+        if demonstration:
+            base_file_name += "_demo"
+        
+        return base_file_name
 
     def log_gaze_target(self, gaze_target: str) -> None:
         self.gaze_target_timings.append(GazeTargetTiming(gaze_target))

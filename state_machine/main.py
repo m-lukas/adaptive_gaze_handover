@@ -17,7 +17,7 @@ DEMONSTRATION=os.getenv("DEMONSTRATION", "false").lower() == "true"
 app = FastAPI()
 sm = StateMachine(dynamic_gaze=DYNAMIC_GAZE)
 
-logger = DataLogger(demonstration=DEMONSTRATION, file_name=PARTICIPANT_IDENTIFIER)
+logger = DataLogger(participant_identifier=PARTICIPANT_IDENTIFIER, dynamic_gaze=DYNAMIC_GAZE, file_name=PARTICIPANT_IDENTIFIER, demonstration=DEMONSTRATION)
 
 @app.on_event("startup")
 async def startup_event():
