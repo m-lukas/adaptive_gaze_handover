@@ -10,13 +10,21 @@ from notifier import notify_arm_program, notify_gaze_program
 from data_logger import DataLogger
 
 
-PARTICIPANT_IDENTIFIER=os.getenv("PARTICIPANT_IDENTIFIER", str(uuid.uuid4())) 
-
+PARTICIPANT_IDENTIFIER=os.getenv("PARTICIPANT_IDENTIFIER", str(uuid.uuid4()))
+DYNAMIC_GAZE=os.getenv("DYNAMIC_GAZE", "false").lower() == "true"
+DEMONSTRATION=os.getenv("DEMONSTRATION", "false").lower() == "true"
 
 app = FastAPI()
-sm = StateMachine(dynamic_gaze=True)
+sm = StateMachine(dynamic_gaze=DYNAMIC_GAZE)
 
-logger = DataLogger(demonstration=True, file_name=PARTICIPANT_IDENTIFIER)
+logger = DataLogger(demonstration=DEMONSTRATION, file_name=PARTICIPANT_IDENTIFIER)
+
+@app.on_event("startup")
+async def startup_event():
+    print("Starting State Machine ...\n")
+    print(f"Identifier: {PARTICIPANT_IDENTIFIER}")
+    print(f"Dynamic Gaze: {DYNAMIC_GAZE}")
+    print(f"Demonstration: {DEMONSTRATION}")
 
 @app.on_event("shutdown")
 def shutdown_event():
