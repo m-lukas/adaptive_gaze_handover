@@ -46,8 +46,19 @@ class EventPayload(BaseModel):
 
 @app.post("/config", status_code=202)
 async def change_config(data: ConfigPayload):
-    if data.participant_identifier:
+    global participant_identifier, dynamic_gaze, demonstration, sm, logger
+
+    if data.participant_identifier and data.participant_identifier != participant_identifier:
         participant_identifier = data.participant_identifier
+
+    if data.dynamic_gaze != dynamic_gaze:
+        dynamic_gaze = data.dynamic_gaze
+        sm = StateMachine(dynamic_gaze=dynamic_gaze)
+
+    if data.demonstration != demonstration:
+        demonstration = data.demonstration
+
+    logger.update_file_name(participant_identifier, dynamic_gaze, demonstration)
 
     return {"status": "accepted"}
 
