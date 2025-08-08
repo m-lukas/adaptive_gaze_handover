@@ -1,5 +1,6 @@
 import copy
 import math
+import os
 import random
 import sys
 import threading
@@ -13,12 +14,13 @@ from flask import Flask, jsonify, request
 
 from programs import GazeProgram, Transition, programs
 
+os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
 pygame.init()
 
 WIDTH = 1024
 HEIGHT = 768
 TICKS_PER_SECOND = 60
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((0,0), pygame.NOFRAME)
 pygame.display.set_caption("LARO")
 
 # Farben definieren
