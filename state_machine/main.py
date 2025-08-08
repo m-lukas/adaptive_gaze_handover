@@ -10,25 +10,30 @@ from notifier import notify_arm_program, notify_gaze_program
 from data_logger import DataLogger
 
 
-PARTICIPANT_IDENTIFIER=os.getenv("PARTICIPANT_IDENTIFIER", str(uuid.uuid4()))
-DYNAMIC_GAZE=os.getenv("DYNAMIC_GAZE", "false").lower() == "true"
-DEMONSTRATION=os.getenv("DEMONSTRATION", "false").lower() == "true"
+participant_identifier=os.getenv("PARTICIPANT_IDENTIFIER", str(uuid.uuid4()))
+dynamic_gaze=os.getenv("DYNAMIC_GAZE", "false").lower() == "true"
+demonstration=os.getenv("DEMONSTRATION", "false").lower() == "true"
 
 app = FastAPI()
-sm = StateMachine(dynamic_gaze=DYNAMIC_GAZE)
+sm = StateMachine(dynamic_gaze=dynamic_gaze)
 
-logger = DataLogger(participant_identifier=PARTICIPANT_IDENTIFIER, dynamic_gaze=DYNAMIC_GAZE, file_name=PARTICIPANT_IDENTIFIER, demonstration=DEMONSTRATION)
+logger = DataLogger(participant_identifier=participant_identifier, dynamic_gaze=dynamic_gaze, file_name=participant_identifier, demonstration=demonstration)
 
 @app.on_event("startup")
 async def startup_event():
     print("Starting State Machine ...\n")
-    print(f"Identifier: {PARTICIPANT_IDENTIFIER}")
-    print(f"Dynamic Gaze: {DYNAMIC_GAZE}")
-    print(f"Demonstration: {DEMONSTRATION}")
+    print(f"Identifier: {participant_identifier}")
+    print(f"Dynamic Gaze: {dynamic_gaze}")
+    print(f"Demonstration: {demonstration}")
 
 @app.on_event("shutdown")
 def shutdown_event():
     logger.write_files()
+
+class ConfigPayload(BaseModel):
+    participant_identifier: str | None
+    dynamic_gaze: bool | None
+    demonstration: bool | None
 
 class GazeTargetPayload(BaseModel):
     target: GazeTarget
@@ -38,6 +43,13 @@ class ArmLocationPayload(BaseModel):
 
 class EventPayload(BaseModel):
     name: str  # must be "handover_start_detected" or "object_in_bowl"
+
+@app.post("/config", status_code=202)
+async def change_config(data: ConfigPayload):
+    if data.participant_identifier:
+        participant_identifier = data.participant_identifier
+
+    return {"status": "accepted"}
 
 @app.post("/gaze_target", status_code=202)
 async def update_gaze_target(data: GazeTargetPayload, bg: BackgroundTasks):
