@@ -362,17 +362,10 @@ def run_flask():
     app.run(port=2222)
 
 
-# ------------------------------
-
 # ----- Start Flask in a thread -----
 flask_thread = threading.Thread(target=run_flask, daemon=True)
 flask_thread.start()
 
-# States
-READY_FOR_ARROW = 0
-AWAITING_SPACE_OR_ERROR = 1
-
-state = READY_FOR_ARROW
 
 # Main loop
 base_interval = 3  # Mittelwert (in Sekunden)
@@ -393,21 +386,17 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-            elif event.key == pygame.K_LEFT and state == READY_FOR_ARROW:
+            elif event.key == pygame.K_LEFT:
                 notify_keyboard_event("handover_start_detected_left")
-                state = AWAITING_SPACE_OR_ERROR
 
-            elif event.key == pygame.K_RIGHT and state == READY_FOR_ARROW:
+            elif event.key == pygame.K_RIGHT:
                 notify_keyboard_event("handover_start_detected_right")
-                state = AWAITING_SPACE_OR_ERROR
 
-            elif event.key == pygame.K_SPACE and state == AWAITING_SPACE_OR_ERROR:
-                notify_keyboard_event("object_in_bowl")
-                state = READY_FOR_ARROW
+            elif event.key == pygame.K_SPACE:
+                notify_keyboard_event("object_in_bowl") 
 
-            elif event.key == pygame.K_CLEAR and state == AWAITING_SPACE_OR_ERROR:
+            elif event.key == pygame.K_CLEAR:
                 notify_keyboard_event("error_during_handover")
-                state = READY_FOR_ARROW
 
     dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
 
