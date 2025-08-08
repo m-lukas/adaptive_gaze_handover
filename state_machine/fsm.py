@@ -97,13 +97,11 @@ class CurrentState:
         current_gaze_program: GazeProgram,
         last_arm_location: ArmLocation,
         last_gaze_update: datetime,
-        initiated_handover_waiting: HandoverInitiatedTray | None,
     ):
         self.current_handover_state = current_handover_state
         self.current_gaze_program = current_gaze_program
         self.last_arm_location = last_arm_location
         self.last_gaze_update = last_gaze_update
-        self.initiated_handover_waiting = initiated_handover_waiting
 
 
 class UpdatedState:
@@ -209,28 +207,27 @@ class StateMachine:
             # HS_PACKAGING
             (
                 HandoverState.PACKAGING,
-                lambda u, c: u.handover_finished == True
-                and c.initiated_handover_waiting == None,
+                lambda u, c: u.handover_finished == True,
                 HandoverState.NO_ACTIVE_HANDOVER,
                 None,
                 GazeProgram.MUTUAL,
-            ),
-            (
-                HandoverState.PACKAGING,
-                lambda u, c: u.handover_finished == True
-                and c.initiated_handover_waiting == HandoverInitiatedTray.LEFT,
-                HandoverState.MOVING_TO_PERSON_LEFT,
-                ArmProgram.MOVE_TO_LEFT_HANDOVER,
-                GazeProgram.MOVE_TO_PERSON_LEFT,
-            ),
-            (
-                HandoverState.PACKAGING,
-                lambda u, c: u.handover_finished == True
-                and c.initiated_handover_waiting == HandoverInitiatedTray.RIGHT,
-                HandoverState.MOVING_TO_PERSON_RIGHT,
-                ArmProgram.MOVE_TO_RIGHT_HANDOVER,
-                GazeProgram.MOVE_TO_PERSON_RIGHT,
-            ),
+            )
+            # (
+            #     HandoverState.PACKAGING,
+            #     lambda u, c: u.handover_finished == True
+            #     and c.initiated_handover_waiting == HandoverInitiatedTray.LEFT,
+            #     HandoverState.MOVING_TO_PERSON_LEFT,
+            #     ArmProgram.MOVE_TO_LEFT_HANDOVER,
+            #     GazeProgram.MOVE_TO_PERSON_LEFT,
+            # ),
+            # (
+            #     HandoverState.PACKAGING,
+            #     lambda u, c: u.handover_finished == True
+            #     and c.initiated_handover_waiting == HandoverInitiatedTray.RIGHT,
+            #     HandoverState.MOVING_TO_PERSON_RIGHT,
+            #     ArmProgram.MOVE_TO_RIGHT_HANDOVER,
+            #     GazeProgram.MOVE_TO_PERSON_RIGHT,
+            # ),
         ]
 
         self.dynamic_gaze_transitions: List[GazeTransition] = [
