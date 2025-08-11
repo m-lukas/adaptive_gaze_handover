@@ -44,6 +44,9 @@ class DataLogger:
             base_file_name += "_demo"
         
         return base_file_name
+    
+    def update_file_name(self, participant_identifier: str, dynamic_gaze: bool, demonstration: bool) -> None:
+        self.file_name = self.create_base_file_name(participant_identifier, dynamic_gaze, demonstration)
 
     def log_gaze_target(self, gaze_target: str) -> None:
         self.gaze_target_timings.append(GazeTargetTiming(gaze_target))

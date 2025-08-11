@@ -137,7 +137,6 @@ class StateMachine:
             current_gaze_program=GazeProgram.IDLE,
             last_arm_location=ArmLocation.IDLE,
             last_gaze_update=datetime.now(),
-            initiated_handover_waiting=None,
         )
 
         self.handover_transitions: List[HandoverTransition] = [
