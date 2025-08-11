@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Panda Experiment Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    /* Service status indicators */
+    .status-container {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .status-box {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        border-radius: 4px;
+        background-color: gray;    /* unknown state */
+    }
+    .status-box.up {
+        background-color: green;
+    }
+    .status-box.down {
+        background-color: red;
+    }
+    /* Tab navigation */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 16px;
+    }
+    .tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+    }
+    .tab:hover {
+      background-color: #f5f5f5;
+    }
+    .tab.active {
+      border-color: #ddd;
+      border-bottom: 2px solid white;
+      background-color: white;
+      font-weight: bold;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    #config-tab {
+        background-color: #ececec;
+    }
+    /* Buttons and form elements */
+    .buttons, .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .buttons button,
+    .form-group button {
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #666;
+      background: #f5f5f5;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .buttons button:hover,
+    .form-group button:hover {
+      background-color: #e0e0e0;
+      border-color: #444;
+    }
+    .form-group label {
+      flex: 1 1 45%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-group input[type="text"],
+    .form-group select {
+      flex: 1 1 100%;
+      padding: 6px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+    }
+    #output {
+      white-space: pre-wrap;
+      padding: 12px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+      min-height: 60px;
+    }
+    .output-box{
+        overflow-wrap: break-word
+    }
+    .output-box.success {
+        border-color: green;
+        background-color: #e6ffe6;
+        animation: flash 0.4s ease-in-out;
+    }
+    .output-box.error {
+        border-color: red;
+        background-color: #ffe6e6;
+        animation: flash 0.4s ease-in-out;
+    }
+    @keyframes flash {
+        0%   { opacity: 0.4; }
+        50%  { opacity: 1; }
+        100% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Panda Experiment Controller</h1>
+
+  <!-- Service Status Indicators -->
+  <div class="status-container">
+    <div id="status-1111" class="status-box">State Machine</div>
+    <div id="status-2222" class="status-box">Gaze Animation</div>
+    <div id="status-3333" class="status-box">Panda Controller</div>
+  </div>
+
+  <!-- Tab navigation -->
+  <div class="tabs">
+    <div id="config-tab" class="tab active"     data-tab="config">Experiment Config</div>
+    <div class="tab"            data-tab="programs">Program Controls</div>
+    <div class="tab"            data-tab="gaze-target">Gaze Targets</div>
+    <div class="tab"            data-tab="events">Events</div>
+    <div class="tab"            data-tab="arm-location">Arm Location</div>
+    <div class="tab"            data-tab="gaze-anim">Gaze Animation</div>
+  </div>
+
+  <!-- TAB: Experiment Config -->
+  <div id="config" class="tab-content active">
+    <form id="config-form">
+      <div class="form-group">
+        <label>
+          Participant Identifier
+          <input type="text" name="participant_identifier" placeholder="e.g. P001">
+        </label>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" name="dynamic_gaze"> Dynamic Gaze</label>
+        <label><input type="checkbox" name="demonstration"> Demonstration</label>
+      </div>
+      <div class="form-group">
+        <button type="submit">Update Config</button>
+      </div>
+    </form>
+    <div id="output-config" class="output-box">Fill in and submit to update experiment config...</div>
+  </div>
+
+  <!-- TAB: Program Controls -->
+  <div id="programs" class="tab-content">
+    <div class="buttons">
+      <button data-program="move_to_left_tray">Move to Left Tray</button>
+      <button data-program="move_to_right_tray">Move to Right Tray</button>
+      <button data-program="move_to_packaging">Move to Packaging</button>
+      <button data-program="move_to_idle">Move to Idle</button>
+      <button data-program="wink">Wink</button>
+      <button data-program="home">Home Robot</button>
+      <button data-program="prepare_experiment">Prepare Experiment</button>
+      <button data-program="end_experiment">End Experiment</button>
+      <button data-program="full_test">Full Test</button>
+    </div>
+    <div id="output-programs" class="output-box">Click a button to start a program...</div>
+  </div>
+
+  <!-- Gaze Targets -->
+  <div id="gaze-target" class="tab-content">
+    <div class="buttons">
+      <button data-target="robot_face">Robot Face</button>
+      <button data-target="packaging_area">Packaging Area</button>
+      <button data-target="left_handover_location">Left Handover Location</button>
+      <button data-target="right_handover_location">Right Handover Location</button>
+    </div>
+    <div id="output-gaze-target" class="output-box">Click a target to send gaze target...</div>
+  </div>
+
+  <!-- Events -->
+  <div id="events" class="tab-content">
+    <div class="buttons">
+      <button data-name="handover_start_detected_left">Handover Start Left</button>
+      <button data-name="handover_start_detected_right">Handover Start Right</button>
+      <button data-name="object_in_bowl">Object in Bowl</button>
+      <button data-name="error_during_handover">Error during Handover</button>
+      <button data-name="handover_finished">Handover Finished</button>
+      <button data-name="gaze_program_finished">Gaze Program Finished</button>
+      <button data-name="task_completed">Task Completed</button>
+    </div>
+    <div id="output-events" class="output-box">Click a to send event...</div>
+  </div>
+
+  <!-- Arm Location -->
+  <div id="arm-location" class="tab-content">
+    <div class="buttons">
+      <button data-location="handover_location">Handover Location</button>
+      <button data-location="packaging">Packaging</button>
+      <button data-location="idle">Idle</button>
+    </div>
+    <div id="output-arm-location" class="output-box">Click a to send an arm location...</div>
+  </div>
+
+  <!-- Gaze Animation -->
+  <div id="gaze-anim" class="tab-content">
+    <div class="buttons">
+      <button data-program="packaging">Packaging</button>
+      <button data-program="trays">Trays</button>
+      <button data-program="mutual_short">Mutual Short</button>
+      <button data-program="ensuring_right">Ensuring Right</button>
+      <button data-program="ensuring_left">Ensuring Left</button>
+      <button data-program="gaze_right_handover">Gaze Right Handover</button>
+      <button data-program="gaze_left_handover">Gaze Left Handover</button>
+      <button data-program="mutual">Mutual</button>
+      <button data-program="waiting">Waiting</button>
+      <button data-program="unsure">Unsure</button>
+      <button data-program="move_to_packaging_right">Move to Packaging Right</button>
+      <button data-program="move_to_packaging_left">Move to Packaging Left</button>
+      <button data-program="receiving_right">Receiving Right</button>
+      <button data-program="receiving_left">Receiving Left</button>
+      <button data-program="move_to_person_right">Move to Person Right</button>
+      <button data-program="move_to_person_left">Move to Person Left</button>
+      <button data-program="idle">Idle</button>
+    </div>
+    <div class="form-group">
+      <label>
+        Or Custom Animation
+        <input type="text" id="anim-custom" placeholder="Custom name">
+      </label>
+      <button id="custom-anim-btn">Trigger Custom</button>
+    </div>
+    <div id="output-gaze-anim" class="output-box">Click a button or trigger custom animation...</div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Generic POST helper
+    function postJson(url, payload, outputId) {
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res =>
+            res.text().then(text => {
+            const el = document.getElementById(outputId);
+            // update content
+            el.textContent = 'Status: ' + res.status + '\n' + text;
+            // reset and retrigger animation
+            el.classList.remove('success', 'error');
+            void el.offsetWidth;
+            // highlight based on status
+            if (res.ok) {
+                el.classList.add('success');
+            } else {
+                el.classList.add('error');
+            }
+            })
+        )
+        .catch(err => {
+            const el = document.getElementById(outputId);
+            el.textContent = 'Error: ' + err;
+            el.classList.remove('success', 'error');
+            void el.offsetWidth;
+            el.classList.add('error');
+        });
+    }
+
+    // Experiment Config
+    document.getElementById('config-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const f = e.target;
+      postJson(
+        'http://0.0.0.0:1111/config',
+        {
+          participant_identifier: f.participant_identifier.value || null,
+          dynamic_gaze: f.dynamic_gaze.checked,
+          demonstration: f.demonstration.checked
+        },
+        'output-config'
+      );
+    });
+
+    // Program Controls
+    document.querySelectorAll('#programs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        postJson(
+          'http://0.0.0.0:3333/start',
+          { program: btn.dataset.program },
+          'output-programs'
+        );
+      });
+    });
+
+    // Gaze Targets
+    document.querySelectorAll('#gaze-target .buttons button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        postJson(
+          'http://0.0.0.0:1111/gaze_target',
+          { target: btn.dataset.target },
+          'output-gaze-target'
+        );
+      });
+    });
+
+    // Events
+    document.querySelectorAll('#events .buttons button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        postJson(
+          'http://0.0.0.0:1111/event',
+          { name: btn.dataset.name },
+          'output-events'
+        );
+      });
+    });
+
+    // Arm Location
+    document.querySelectorAll('#arm-location .buttons button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        postJson(
+          'http://0.0.0.0:1111/arm_location',
+          { location: btn.dataset.location },
+          'output-arm-location'
+        );
+      });
+    });
+
+    // Gaze Animation: predefined
+    document.querySelectorAll('#gaze-anim .buttons button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        postJson(
+          'http://0.0.0.0:2222/trigger',
+          { program: btn.dataset.program },
+          'output-gaze-anim'
+        );
+      });
+    });
+
+    // Gaze Animation: custom
+    document.getElementById('custom-anim-btn').addEventListener('click', () => {
+      const name = document.getElementById('anim-custom').value.trim();
+      if (!name) return alert('Enter a custom animation name');
+      postJson(
+        'http://0.0.0.0:2222/trigger',
+        { program: name },
+        'output-gaze-anim'
+      );
+    });
+
+    // check a single service via HEAD
+    function checkService(port, elId) {
+        fetch(`http://0.0.0.0:${port}/`, { method: 'GET' })
+            .then(res => {
+                const el = document.getElementById(elId);
+                if (res.ok || res.status == 404) {
+                    el.classList.add('up');
+                    el.classList.remove('down');
+                } else {
+                    el.classList.add('down');
+                    el.classList.remove('up');
+                }
+            })
+            .catch(() => {
+                const el = document.getElementById(elId);
+                el.classList.add('down');
+                el.classList.remove('up');
+            });
+    }
+
+    // run on load and every 10s
+    function checkAllServices() {
+        checkService(1111, 'status-1111');
+        checkService(2222, 'status-2222');
+        checkService(3333, 'status-3333');
+    }
+
+    window.addEventListener('load', () => {
+        checkAllServices();
+        setInterval(checkAllServices, 60000);
+    });
+
+  </script>
+</body>
+</html>

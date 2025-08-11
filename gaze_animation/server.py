@@ -10,7 +10,7 @@ from math import pi as PI
 import numpy as np
 from notifier import notify_gaze_program_finished, notify_keyboard_event
 import pygame
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 
 from programs import GazeProgram, Transition, programs
 
@@ -77,23 +77,47 @@ animation_lock = threading.Lock()
 current_command = {"program": programs["idle"], "elapsed": 0, "current_pos": [0, 0]}
 
 
-@app.route("/trigger", methods=["POST"])
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+
+def _corsify_actual_response(response, status_code=200):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response, status_code
+
+
+@app.route("/", methods=["GET", "OPTIONS"])
+def status():
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+
+    return _corsify_actual_response(jsonify({"status": "ok"}))
+
+
+@app.route("/trigger", methods=["POST", "OPTIONS"])
 def trigger():
-    global current_command
-    data = request.get_json()
-    try:
-        name = data["program"]
-    except (TypeError, ValueError):
-        return jsonify({"error": "Invalid input"}), 400
+    if request.method == "OPTIONS":
+        return _build_cors_preflight_response()
+    elif request.method == "POST":
+        global current_command
+        data = request.get_json()
+        try:
+            name = data["program"]
+        except (TypeError, ValueError):
+            return _corsify_actual_response(jsonify({"error": "Invalid input"}), 400)
 
-    if name in programs:
-        notify_gaze_program_finished()
-        program = copy.copy(programs[name])
-        with animation_lock:
-            program.start_pos = current_command["current_pos"]
-            current_command.update({"program": program, "elapsed": 0})
+        if name in programs:
+            notify_gaze_program_finished()
+            program = copy.copy(programs[name])
+            with animation_lock:
+                program.start_pos = current_command["current_pos"]
+                current_command.update({"program": program, "elapsed": 0})
 
-    return jsonify({"program": name})
+        return _corsify_actual_response(jsonify({"program": name}))
 
 
 @app.route("/move", methods=["POST"])

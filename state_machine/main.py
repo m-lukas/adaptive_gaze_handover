@@ -1,6 +1,7 @@
 import os
 import uuid
 from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fsm import (
     StateMachine, StateUpdate,
@@ -15,16 +16,27 @@ dynamic_gaze=os.getenv("DYNAMIC_GAZE", "false").lower() == "true"
 demonstration=os.getenv("DEMONSTRATION", "false").lower() == "true"
 
 app = FastAPI()
-sm = StateMachine(dynamic_gaze=dynamic_gaze)
 
-logger = DataLogger(participant_identifier=participant_identifier, dynamic_gaze=dynamic_gaze, file_name=participant_identifier, demonstration=demonstration)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+sm = StateMachine(dynamic_gaze=dynamic_gaze)
+logger = DataLogger(participant_identifier=participant_identifier, dynamic_gaze=dynamic_gaze, demonstration=demonstration)
+
+def print_config() -> None:
+    print(f"Identifier: {participant_identifier}")
+    print(f"Dynamic Gaze: {dynamic_gaze}")
+    print(f"Demonstration: {demonstration}")
 
 @app.on_event("startup")
 async def startup_event():
     print("Starting State Machine ...\n")
-    print(f"Identifier: {participant_identifier}")
-    print(f"Dynamic Gaze: {dynamic_gaze}")
-    print(f"Demonstration: {demonstration}")
+    print_config()
 
 @app.on_event("shutdown")
 def shutdown_event():
@@ -44,6 +56,10 @@ class ArmLocationPayload(BaseModel):
 class EventPayload(BaseModel):
     name: str  # must be "handover_start_detected" or "object_in_bowl"
 
+@app.get("/", status_code=200)
+async def status():
+    return {"status": "ok"}
+
 @app.post("/config", status_code=202)
 async def change_config(data: ConfigPayload):
     global participant_identifier, dynamic_gaze, demonstration, sm, logger
@@ -59,8 +75,9 @@ async def change_config(data: ConfigPayload):
         demonstration = data.demonstration
 
     logger.update_file_name(participant_identifier, dynamic_gaze, demonstration)
+    print_config()
 
-    return {"status": "accepted"}
+    return {"status": "accepted", "new_config": {"participant_identifier": participant_identifier, "dynamic_gaze": dynamic_gaze, "demonstration": demonstration}}
 
 @app.post("/gaze_target", status_code=202)
 async def update_gaze_target(data: GazeTargetPayload, bg: BackgroundTasks):
