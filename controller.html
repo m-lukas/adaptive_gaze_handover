@@ -262,8 +262,19 @@
       });
     });
 
+    function updateStatusBar(barId, status) {
+      const el = document.getElementById(barId);
+      if (status == "ok") {
+          el.classList.add('up');
+          el.classList.remove('down');
+      } else {
+          el.classList.add('down');
+          el.classList.remove('up');
+      }
+    }
+
     // Generic POST helper
-    function postJson(url, payload, outputId) {
+    function postJson(url, payload, barId, outputId) {
         fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -271,18 +282,19 @@
         })
         .then(res =>
             res.text().then(text => {
-            const el = document.getElementById(outputId);
-            // update content
-            el.textContent = 'Status: ' + res.status + '\n' + text;
-            // reset and retrigger animation
-            el.classList.remove('success', 'error');
-            void el.offsetWidth;
-            // highlight based on status
-            if (res.ok) {
-                el.classList.add('success');
-            } else {
-                el.classList.add('error');
-            }
+              const el = document.getElementById(outputId);
+              // update content
+              el.textContent = 'Status: ' + res.status + '\n' + text;
+              // reset and retrigger animation
+              el.classList.remove('success', 'error');
+              void el.offsetWidth;
+              // highlight based on status
+              if (res.ok) {
+                  el.classList.add('success');
+              } else {
+                  el.classList.add('error');
+              }
+              updateStatusBar(barId, "ok");
             })
         )
         .catch(err => {
@@ -291,6 +303,7 @@
             el.classList.remove('success', 'error');
             void el.offsetWidth;
             el.classList.add('error');
+            updateStatusBar(barId, "not-ok");
         });
     }
 
@@ -305,6 +318,7 @@
           dynamic_gaze: f.dynamic_gaze.checked,
           demonstration: f.demonstration.checked
         },
+        "status-1111",
         'output-config'
       );
     });
@@ -315,6 +329,7 @@
         postJson(
           'http://0.0.0.0:3333/start',
           { program: btn.dataset.program },
+          "status-3333",
           'output-programs'
         );
       });
@@ -326,6 +341,7 @@
         postJson(
           'http://0.0.0.0:1111/gaze_target',
           { target: btn.dataset.target },
+          "status-1111",
           'output-gaze-target'
         );
       });
@@ -337,6 +353,7 @@
         postJson(
           'http://0.0.0.0:1111/event',
           { name: btn.dataset.name },
+          "status-1111",
           'output-events'
         );
       });
@@ -348,6 +365,7 @@
         postJson(
           'http://0.0.0.0:1111/arm_location',
           { location: btn.dataset.location },
+          "status-1111",
           'output-arm-location'
         );
       });
@@ -359,6 +377,7 @@
         postJson(
           'http://0.0.0.0:2222/trigger',
           { program: btn.dataset.program },
+          "status-2222",
           'output-gaze-anim'
         );
       });
@@ -371,27 +390,19 @@
       postJson(
         'http://0.0.0.0:2222/trigger',
         { program: name },
+        "status-2222",
         'output-gaze-anim'
       );
     });
 
     // check a single service via HEAD
-    function checkService(port, elId) {
+    function checkService(port, barId) {
         fetch(`http://0.0.0.0:${port}/`, { method: 'GET' })
             .then(res => {
-                const el = document.getElementById(elId);
-                if (res.ok || res.status == 404) {
-                    el.classList.add('up');
-                    el.classList.remove('down');
-                } else {
-                    el.classList.add('down');
-                    el.classList.remove('up');
-                }
+                updateStatusBar(barId, "ok");
             })
             .catch(() => {
-                const el = document.getElementById(elId);
-                el.classList.add('down');
-                el.classList.remove('up');
+                updateStatusBar(barId, "not-ok")
             });
     }
 
