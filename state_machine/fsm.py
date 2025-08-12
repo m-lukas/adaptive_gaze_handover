@@ -245,7 +245,7 @@ class StateMachine:
                 lambda u, c: u.new_arm_location == ArmLocation.PACKAGING,
                 HandoverState.PACKAGING,
                 None,
-                None,
+                GazeProgram.PACKAGING,
             ),
             # HS_MOVING_TO_PACKAGING_RIGHT
             (
@@ -253,7 +253,7 @@ class StateMachine:
                 lambda u, c: u.new_arm_location == ArmLocation.PACKAGING,
                 HandoverState.PACKAGING,
                 None,
-                None,
+                GazeProgram.PACKAGING,
             ),
             # HS_PACKAGING
             (
@@ -930,6 +930,7 @@ class StateMachine:
                 u.handover_start_detected,
                 u.handover_finished,
                 u.object_in_bowl,
+                u.error_during_handover,
                 u.new_arm_location,
             ]
         ):
