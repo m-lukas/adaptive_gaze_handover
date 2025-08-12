@@ -5,7 +5,7 @@ from typing import Callable, List, Tuple
 from util import is_time_difference_exceeded
 
 
-GAZE_UPDATE_REFRESH_RATE_MS = 500
+GAZE_UPDATE_REFRESH_RATE_MS = 400
 
 
 class GazeProgram(Enum):
@@ -14,15 +14,16 @@ class GazeProgram(Enum):
     MOVE_TO_PERSON_RIGHT = "move_to_person_right"
     RECEIVING_LEFT = "receiving_left"
     RECEIVING_RIGHT = "receiving_right"
+    EMPHASIZE_LEFT = "emphasize_left"
+    EMPHASIZE_RIGHT = "emphasize_right"
     MOVE_TO_PACKAGING_LEFT = "move_to_packaging_left"
     MOVE_TO_PACKAGING_RIGHT = "move_to_packaging_right"
+    PACKAGING_STATIC = "packaging_static"
     MOVE_TO_ERROR_LEFT = "move_to_error_left"
     MOVE_TO_ERROR_RIGHT = "move_to_error_right"
     ERROR_TO_PERSON_LEFT = "error_to_person_left"
     ERROR_TO_PERSON_RIGHT = "error_to_person_right"
     UNSURE = "unsure"
-    WAITING = "waiting"
-    ENSURING = "ensuring"
     MUTUAL = "mutual"
     LEFT_HANDOVER = "gaze_left_handover"
     RIGHT_HANDOVER = "gaze_right_handover"
@@ -268,91 +269,137 @@ class StateMachine:
             # HS_NO_ACTIVE_HANDOVER
             (
                 HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.UNSURE,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
+                GazeProgram.IDLE,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.IDLE,
+            ),
+            (
+                HandoverState.NO_ACTIVE_HANDOVER,
                 GazeProgram.IDLE,
                 lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
                 GazeProgram.MUTUAL,
             ),
             (
                 HandoverState.NO_ACTIVE_HANDOVER,
-                GazeProgram.UNSURE,
-                lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.MUTUAL,
-            ),
-            (
-                HandoverState.NO_ACTIVE_HANDOVER,
-                GazeProgram.WAITING,
-                lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.UNSURE,
-            ),
-            (
-                HandoverState.NO_ACTIVE_HANDOVER,
-                GazeProgram.WAITING,
-                lambda u, c: u.new_gaze_target == GazeTarget.UNDEFINED,
                 GazeProgram.IDLE,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
             ),
             (
                 HandoverState.NO_ACTIVE_HANDOVER,
-                GazeProgram.MUTUAL,
-                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                GazeProgram.UNSURE,
-            ),
-            (
-                HandoverState.NO_ACTIVE_HANDOVER,
-                GazeProgram.MUTUAL,
-                lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.IDLE,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
             ),
             # HS_MOVING_TO_PERSON_LEFT
             (
                 HandoverState.MOVING_TO_PERSON_LEFT,
                 GazeProgram.MOVE_TO_PERSON_LEFT,
-                lambda u, c: u.new_gaze_target
-                in [GazeTarget.RIGHT_TRAY, GazeTarget.RIGHT_HANDOVER_LOCATION],
-                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.EMPHASIZE_LEFT,
             ),
             (
                 HandoverState.MOVING_TO_PERSON_LEFT,
                 GazeProgram.MOVE_TO_PERSON_LEFT,
                 lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
             ),
             (
                 HandoverState.MOVING_TO_PERSON_LEFT,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.LEFT_HANDOVER,
             ),
             (
                 HandoverState.MOVING_TO_PERSON_LEFT,
-                GazeProgram.LEFT_HANDOVER,
-                lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.EMPHASIZE_LEFT,
             ),
             # HS_MOVING_TO_PERSON_RIGHT
             (
                 HandoverState.MOVING_TO_PERSON_RIGHT,
                 GazeProgram.MOVE_TO_PERSON_RIGHT,
-                lambda u, c: u.new_gaze_target
-                in [GazeTarget.LEFT_TRAY, GazeTarget.LEFT_HANDOVER_LOCATION],
-                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.EMPHASIZE_RIGHT,
             ),
             (
                 HandoverState.MOVING_TO_PERSON_RIGHT,
                 GazeProgram.MOVE_TO_PERSON_RIGHT,
                 lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
             ),
             (
                 HandoverState.MOVING_TO_PERSON_RIGHT,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.RIGHT_HANDOVER,
             ),
             (
                 HandoverState.MOVING_TO_PERSON_RIGHT,
-                GazeProgram.RIGHT_HANDOVER,
-                lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.EMPHASIZE_RIGHT,
             ),
             # HS_WAITING_FOR_RECEIVAL_LEFT
             (
@@ -363,6 +410,12 @@ class StateMachine:
             ),
             (
                 HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.RECEIVING_LEFT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
                 GazeProgram.MUTUAL,
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.ENSURING_LEFT,
@@ -370,14 +423,62 @@ class StateMachine:
             (
                 HandoverState.WAITING_FOR_RECEIVAL_LEFT,
                 GazeProgram.MUTUAL,
-                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_TRAY,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
                 GazeProgram.ENSURING_LEFT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
             ),
             (
                 HandoverState.WAITING_FOR_RECEIVAL_LEFT,
                 GazeProgram.ENSURING_LEFT,
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.RECEIVING_LEFT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.ENSURING_LEFT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.ENSURING_LEFT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.RECEIVING_LEFT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_LEFT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.ENSURING_LEFT,
             ),
             # HS_WAITING_FOR_RECEIVAL_RIGHT
             (
@@ -388,6 +489,12 @@ class StateMachine:
             ),
             (
                 HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.RECEIVING_RIGHT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
                 GazeProgram.MUTUAL,
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.ENSURING_RIGHT,
@@ -395,14 +502,304 @@ class StateMachine:
             (
                 HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
                 GazeProgram.MUTUAL,
-                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_TRAY,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                 GazeProgram.ENSURING_RIGHT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
             ),
             (
                 HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
                 GazeProgram.ENSURING_RIGHT,
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.RECEIVING_RIGHT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.ENSURING_RIGHT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.ENSURING_RIGHT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.RECEIVING_RIGHT,
+            ),
+            (
+                HandoverState.WAITING_FOR_RECEIVAL_RIGHT,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.ENSURING_RIGHT,
+            ),
+            # HS_ERROR_LEFT
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MOVE_TO_ERROR_LEFT,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MOVE_TO_ERROR_LEFT,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MOVE_TO_ERROR_LEFT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.UNSURE,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.UNSURE,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.UNSURE,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            # HS_ERROR_RIGHT
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MOVE_TO_ERROR_RIGHT,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MOVE_TO_ERROR_RIGHT,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MOVE_TO_ERROR_RIGHT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.UNSURE,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.MUTUAL_SHORT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.UNSURE,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.UNSURE,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.UNSURE,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.RIGHT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.LEFT_HANDOVER,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                GazeProgram.LEFT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                GazeProgram.RIGHT_HANDOVER,
+            ),
+            (
+                HandoverState.ERROR_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
             ),
             # HS_MOVING_TO_PACKAGING_LEFT
             (
@@ -413,9 +810,39 @@ class StateMachine:
             ),
             (
                 HandoverState.MOVING_TO_PACKAGING_LEFT,
+                GazeProgram.MOVE_TO_PACKAGING_LEFT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_LEFT,
                 GazeProgram.MUTUAL_SHORT,
                 lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.PACKAGING,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_LEFT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.TRAYS,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_LEFT,
+                GazeProgram.TRAYS,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_LEFT,
+                GazeProgram.TRAYS,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_LEFT,
+                GazeProgram.TRAYS,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
             ),
             # HS_MOVING_TO_PACKAGING_RIGHT
             (
@@ -426,32 +853,62 @@ class StateMachine:
             ),
             (
                 HandoverState.MOVING_TO_PACKAGING_RIGHT,
+                GazeProgram.MOVE_TO_PACKAGING_RIGHT,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_RIGHT,
                 GazeProgram.MUTUAL_SHORT,
                 lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.PACKAGING,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_RIGHT,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.TRAYS,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_RIGHT,
+                GazeProgram.TRAYS,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.PACKAGING_STATIC,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_RIGHT,
+                GazeProgram.TRAYS,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL_SHORT,
+            ),
+            (
+                HandoverState.MOVING_TO_PACKAGING_RIGHT,
+                GazeProgram.TRAYS,
+                lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                GazeProgram.PACKAGING_STATIC,
             ),
             # HS_PACKAGING
             (
                 HandoverState.PACKAGING,
                 GazeProgram.PACKAGING,
                 lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.TRAYS,
+                GazeProgram.PACKAGING_STATIC,
             ),
             (
                 HandoverState.PACKAGING,
-                GazeProgram.TRAYS,
-                lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.MUTUAL,
+                GazeProgram.PACKAGING_STATIC,
+                lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                GazeProgram.MUTUAL_SHORT,
             ),
             (
                 HandoverState.PACKAGING,
-                GazeProgram.MUTUAL,
+                GazeProgram.MUTUAL_SHORT,
                 lambda u, c: u.gaze_program_finished == True,
-                GazeProgram.IDLE,
+                GazeProgram.PACKAGING_STATIC,
             ),
         ]
 
-        # static gaze simply maps handover states → gaze program
+        # static gaze simply maps handover states to gaze program
         self.static_gaze_map = {
             HandoverState.NO_ACTIVE_HANDOVER: GazeProgram.IDLE,
             HandoverState.MOVING_TO_PERSON_LEFT: GazeProgram.MOVE_TO_PERSON_LEFT,
