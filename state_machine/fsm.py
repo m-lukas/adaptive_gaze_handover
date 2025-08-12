@@ -69,6 +69,7 @@ class HandoverState(Enum):
     MOVING_TO_PACKAGING_LEFT = "moving_to_packaging_left"
     MOVING_TO_PACKAGING_RIGHT = "moving_to_packaging_right"
     PACKAGING = "packaging"
+    TASK_COMPLETED = "task_completed"
 
 
 class HandoverInitiatedTray(Enum):
@@ -261,6 +262,13 @@ class StateMachine:
                 lambda u, c: u.handover_finished == True,
                 HandoverState.NO_ACTIVE_HANDOVER,
                 None,
+                GazeProgram.MUTUAL,
+            ),
+            (
+                HandoverState.PACKAGING,
+                lambda u, c: u.task_completed == True,
+                HandoverState.TASK_COMPLETED,
+                ArmProgram.IDLE,
                 GazeProgram.MUTUAL,
             )
         ]
@@ -906,6 +914,19 @@ class StateMachine:
                 lambda u, c: u.gaze_program_finished == True,
                 GazeProgram.PACKAGING_STATIC,
             ),
+            # HS_TASK_COMPLETED
+            (
+                HandoverState.TASK_COMPLETED,
+                GazeProgram.MUTUAL,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.IDLE,
+            ),
+            (
+                HandoverState.TASK_COMPLETED,
+                GazeProgram.IDLE,
+                lambda u, c: u.gaze_program_finished == True,
+                GazeProgram.IDLE,
+            ),
         ]
 
         # static gaze simply maps handover states to gaze program
@@ -920,6 +941,7 @@ class StateMachine:
             HandoverState.MOVING_TO_PACKAGING_LEFT: GazeProgram.MOVE_TO_PACKAGING_LEFT,
             HandoverState.MOVING_TO_PACKAGING_RIGHT: GazeProgram.MOVE_TO_PACKAGING_RIGHT,
             HandoverState.PACKAGING: GazeProgram.PACKAGING,
+            HandoverState.TASK_COMPLETED: GazeProgram.IDLE,
         }
 
     def update_state(self, u: StateUpdate) -> UpdatedState:
