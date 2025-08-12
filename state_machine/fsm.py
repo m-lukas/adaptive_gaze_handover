@@ -910,14 +910,16 @@ class StateMachine:
 
         # static gaze simply maps handover states to gaze program
         self.static_gaze_map = {
-            HandoverState.NO_ACTIVE_HANDOVER: GazeProgram.IDLE,
+            HandoverState.NO_ACTIVE_HANDOVER: GazeProgram.MUTUAL,
             HandoverState.MOVING_TO_PERSON_LEFT: GazeProgram.MOVE_TO_PERSON_LEFT,
             HandoverState.MOVING_TO_PERSON_RIGHT: GazeProgram.MOVE_TO_PERSON_RIGHT,
             HandoverState.WAITING_FOR_RECEIVAL_LEFT: GazeProgram.RECEIVING_LEFT,
             HandoverState.WAITING_FOR_RECEIVAL_RIGHT: GazeProgram.RECEIVING_RIGHT,
+            HandoverState.ERROR_LEFT: GazeProgram.MOVE_TO_ERROR_LEFT,
+            HandoverState.ERROR_RIGHT: GazeProgram.MOVE_TO_ERROR_RIGHT,
             HandoverState.MOVING_TO_PACKAGING_LEFT: GazeProgram.MOVE_TO_PACKAGING_LEFT,
             HandoverState.MOVING_TO_PACKAGING_RIGHT: GazeProgram.MOVE_TO_PACKAGING_RIGHT,
-            HandoverState.PACKAGING: GazeProgram.ENSURING,
+            HandoverState.PACKAGING: GazeProgram.PACKAGING,
         }
 
     def update_state(self, u: StateUpdate) -> UpdatedState:
