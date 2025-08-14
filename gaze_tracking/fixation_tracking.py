@@ -19,7 +19,7 @@ SHOW_IMAGE = False
 
 pg = PyGaze(model_path="models/eth-xgaze_resnet18.pth")
 pgren = PyGazeRenderer()
-v = cv2.VideoCapture(2)
+v = cv2.VideoCapture(0)
 
 
 gaze_calibration_vectors = {
