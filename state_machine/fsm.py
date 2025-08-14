@@ -410,39 +410,11 @@ class StateMachine:
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
                         GazeProgram.EMPHASIZE_LEFT,
-                    ),
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                        GazeProgram.MUTUAL_SHORT,
-                    )
-                ],
-                GazeProgram.MUTUAL_SHORT: [
-                    (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.LEFT_HANDOVER,
-                    ),
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
-                        GazeProgram.EMPHASIZE_LEFT,
                     )
                 ]
             },
             HandoverState.MOVING_TO_PERSON_RIGHT: {
                 GazeProgram.MOVE_TO_PERSON_RIGHT: [
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
-                        GazeProgram.EMPHASIZE_RIGHT,
-                    ),
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                        GazeProgram.MUTUAL_SHORT,
-                    )
-                ],
-                GazeProgram.MUTUAL_SHORT: [
-                    (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.RIGHT_HANDOVER,
-                    ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.EMPHASIZE_RIGHT,
