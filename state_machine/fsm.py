@@ -300,12 +300,28 @@ class StateMachine:
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
                         GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
                     )
                 ],
                 GazeProgram.UNSURE: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.MUTUAL,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
                     )
                 ],
                 GazeProgram.LEFT_HANDOVER: [
@@ -315,11 +331,15 @@ class StateMachine:
                     ),
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.UNSURE,
+                        GazeProgram.IDLE,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
                         GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
                     )
                 ],
                 GazeProgram.RIGHT_HANDOVER: [
@@ -329,11 +349,15 @@ class StateMachine:
                     ),
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.UNSURE,
+                        GazeProgram.IDLE,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
                     )
                 ],
                 GazeProgram.IDLE: [
@@ -352,6 +376,32 @@ class StateMachine:
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
                         GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
+                    )
+                ],
+                GazeProgram.PACKAGING_STATIC: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.IDLE,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                        GazeProgram.MUTUAL,
                     )
                 ]
             },
