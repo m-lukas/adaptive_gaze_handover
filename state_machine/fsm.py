@@ -48,6 +48,7 @@ class ArmLocation(Enum):
     HANDOVER_LOCATION = "handover_location"
     PACKAGING = "packaging"
     IDLE = "idle"
+    ERROR_POSE = "error_pose"
 
 
 class ArmProgram(Enum):
@@ -66,6 +67,8 @@ class HandoverState(Enum):
     WAITING_FOR_RECEIVAL_RIGHT = "waiting_for_receival_right"
     ERROR_LEFT = "error_left"
     ERROR_RIGHT = "error_right"
+    ERROR_WAITING_LEFT = "error_waiting_left"
+    ERROR_WAITING_RIGHT = "error_waiting_right"
     MOVING_TO_PACKAGING_LEFT = "moving_to_packaging_left"
     MOVING_TO_PACKAGING_RIGHT = "moving_to_packaging_right"
     PACKAGING = "packaging"
@@ -208,6 +211,22 @@ class StateMachine:
             ],
             HandoverState.ERROR_LEFT: [
                 (
+                    lambda u, c: u.new_arm_location == ArmLocation.ERROR_POSE,
+                    HandoverState.ERROR_WAITING_LEFT,
+                    None,
+                    GazeProgram.UNSURE,
+                )
+            ],
+            HandoverState.ERROR_RIGHT: [
+                (
+                    lambda u, c: u.new_arm_location == ArmLocation.ERROR_POSE,
+                    HandoverState.ERROR_WAITING_RIGHT,
+                    None,
+                    GazeProgram.UNSURE,
+                )
+            ],
+            HandoverState.ERROR_WAITING_LEFT: [
+                (
                     lambda u, c: u.handover_start_detected == HandoverInitiatedTray.LEFT,
                     HandoverState.MOVING_TO_PERSON_LEFT,
                     ArmProgram.MOVE_TO_LEFT_HANDOVER,
@@ -220,7 +239,7 @@ class StateMachine:
                     GazeProgram.ERROR_TO_PERSON_RIGHT,
                 )
             ],
-            HandoverState.ERROR_RIGHT: [
+            HandoverState.ERROR_WAITING_RIGHT: [
                 (
                     lambda u, c: u.handover_start_detected == HandoverInitiatedTray.LEFT,
                     HandoverState.MOVING_TO_PERSON_LEFT,
@@ -820,6 +839,8 @@ class StateMachine:
             HandoverState.WAITING_FOR_RECEIVAL_RIGHT: GazeProgram.RECEIVING_RIGHT,
             HandoverState.ERROR_LEFT: GazeProgram.MOVE_TO_ERROR_LEFT,
             HandoverState.ERROR_RIGHT: GazeProgram.MOVE_TO_ERROR_RIGHT,
+            HandoverState.ERROR_WAITING_LEFT: GazeProgram.UNSURE,
+            HandoverState.ERROR_WAITING_RIGHT: GazeProgram.UNSURE,
             HandoverState.MOVING_TO_PACKAGING_LEFT: GazeProgram.MOVE_TO_PACKAGING_LEFT,
             HandoverState.MOVING_TO_PACKAGING_RIGHT: GazeProgram.MOVE_TO_PACKAGING_RIGHT,
             HandoverState.PACKAGING: GazeProgram.PACKAGING,
