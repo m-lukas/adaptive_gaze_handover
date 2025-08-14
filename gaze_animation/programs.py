@@ -45,10 +45,10 @@ class GazeProgram:
         self.index = 0
 
 
-packaging_common = Target(1, 0.7)
+packaging_common = Target(1, 0.2)
 packaging_container = Target(1, 0.5)
-left_handover = Target(-0.5, 1)
-right_handover = Target(0.2, 1)
+left_handover = Target(-0.5, 0.8)
+right_handover = Target(0.2, 0.8)
 mutual = Target(0, 0.2)
 center_handover = Target(0, 1)
 error_pose = Target(0.3, 0.3)
@@ -182,8 +182,8 @@ programs = {
     ),
     "mutual_short": GazeProgram(
         saccades=[
-            TargetTransition(mutual, 0.5),
-            Delay(0.5),
+            TargetTransition(mutual, 0.2),
+            Delay(0.4),
         ],
     ),
     "trays": GazeProgram(
