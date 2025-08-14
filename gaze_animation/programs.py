@@ -51,6 +51,7 @@ left_handover = Target(-0.5, 1)
 right_handover = Target(0.2, 1)
 mutual = Target(0, 0.2)
 center_handover = Target(0, 1)
+error_pose = Target(0.3, 0.3)
 
 
 programs = {
@@ -139,12 +140,6 @@ programs = {
             TargetTransition(mutual, 0.2),
         ],
     ),
-    "waiting": GazeProgram(
-        saccades=[
-            TargetTransition(mutual, 2),
-            Delay(2)
-        ],
-    ),
     "mutual": GazeProgram(
         saccades=[
             TargetTransition(mutual, 0.5),
@@ -206,4 +201,60 @@ programs = {
             TargetTransition(packaging_common, 0.5),
         ],
     ),
+    "emphasize_left": GazeProgram(
+        saccades=[
+            TargetTransition(left_handover, 0.5),
+            Delay(0.8),
+            TargetTransition(mutual, 0.4),
+            Delay(0.4),
+            TargetTransition(left_handover, 0.5),
+            Delay(0.8),
+        ],
+    ),
+    "emphasize_right": GazeProgram(
+        saccades=[
+            TargetTransition(right_handover, 0.5),
+            Delay(0.8),
+            TargetTransition(mutual, 0.4),
+            Delay(0.4),
+            TargetTransition(right_handover, 0.5),
+            Delay(0.8),
+        ],
+    ),
+    "packaging_static": GazeProgram(
+        saccades=[
+            TargetTransition(packaging_container, 0.4),
+            Delay(1),
+        ],
+    ),
+    "move_to_error_left": GazeProgram(
+        saccades=[
+            TargetTransition(left_handover, 0.2),
+            TargetTransition(error_pose, 2, EaseFunction.SMOOTHSTEP),
+        ],
+    ),
+    "move_to_error_right": GazeProgram(
+        saccades=[
+            TargetTransition(right_handover, 0.2),
+            TargetTransition(error_pose, 2, EaseFunction.SMOOTHSTEP),
+        ],
+    ),
+    "error_pose": GazeProgram(
+        saccades=[
+            TargetTransition(error_pose, 0.2),
+            Delay(0.8),
+        ],
+    ),
+    "error_to_person_left": GazeProgram(
+        saccades=[
+            TargetTransition(error_pose, 0.2),
+            TargetTransition(left_handover, 2, EaseFunction.SMOOTHSTEP),
+        ],
+    ),
+    "error_to_person_right": GazeProgram(
+        saccades=[
+            TargetTransition(error_pose, 0.2),
+            TargetTransition(right_handover, 2, EaseFunction.SMOOTHSTEP),
+        ],
+    )
 }
