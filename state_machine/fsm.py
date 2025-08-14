@@ -897,18 +897,6 @@ class StateMachine:
                         lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
                     )
-                ],
-                GazeProgram.PACKAGING_STATIC: [
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                        GazeProgram.MUTUAL_SHORT,
-                    )
-                ],
-                GazeProgram.MUTUAL_SHORT: [
-                    (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.PACKAGING_STATIC,
-                    )
                 ]
             },
             HandoverState.TASK_COMPLETED: {
