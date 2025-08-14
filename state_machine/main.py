@@ -120,6 +120,7 @@ async def update_arm_location(data: ArmLocationPayload, bg: BackgroundTasks):
 
 def _process_update(update: StateUpdate):
     changes = sm.update_state(update)
+    print(f"Changes: {changes.__dict__}" )
     if changes.arm_program:
         notify_arm_program(changes.arm_program)
     if changes.gaze_program:
