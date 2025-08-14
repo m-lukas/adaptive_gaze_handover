@@ -678,7 +678,7 @@ class StateMachine:
                 ]
             },
             HandoverState.ERROR_WAITING_LEFT: {
-                GazeProgram.MUTUAL_SHORT: [
+                GazeProgram.MUTUAL: [
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
@@ -695,7 +695,7 @@ class StateMachine:
                 GazeProgram.UNSURE: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -709,7 +709,7 @@ class StateMachine:
                 GazeProgram.LEFT_HANDOVER: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
@@ -723,7 +723,7 @@ class StateMachine:
                 GazeProgram.RIGHT_HANDOVER: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -737,7 +737,7 @@ class StateMachine:
                 GazeProgram.PACKAGING_STATIC: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -754,7 +754,7 @@ class StateMachine:
                 ]
             },
             HandoverState.ERROR_WAITING_RIGHT: {
-                GazeProgram.MUTUAL_SHORT: [
+                GazeProgram.MUTUAL: [
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
@@ -771,7 +771,7 @@ class StateMachine:
                 GazeProgram.UNSURE: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -785,7 +785,7 @@ class StateMachine:
                 GazeProgram.LEFT_HANDOVER: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
@@ -799,7 +799,7 @@ class StateMachine:
                 GazeProgram.RIGHT_HANDOVER: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -813,7 +813,7 @@ class StateMachine:
                 GazeProgram.PACKAGING_STATIC: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL_SHORT,
+                        GazeProgram.MUTUAL,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
