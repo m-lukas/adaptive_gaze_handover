@@ -143,7 +143,7 @@ programs = {
     "mutual": GazeProgram(
         saccades=[
             TargetTransition(mutual, 0.5),
-            Delay(0.8)
+            Delay(2)
         ],
     ),
     "gaze_left_handover": GazeProgram(
