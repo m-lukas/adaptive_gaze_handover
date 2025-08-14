@@ -21,6 +21,7 @@ class GazeProgram(Enum):
     PACKAGING_STATIC = "packaging_static"
     MOVE_TO_ERROR_LEFT = "move_to_error_left"
     MOVE_TO_ERROR_RIGHT = "move_to_error_right"
+    ERROR_POSE = "error_pose"
     ERROR_TO_PERSON_LEFT = "error_to_person_left"
     ERROR_TO_PERSON_RIGHT = "error_to_person_right"
     UNSURE = "unsure"
@@ -538,13 +539,123 @@ class StateMachine:
                     ),
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.UNSURE,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ],
+                GazeProgram.MUTUAL_SHORT: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.RIGHT_HANDOVER,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
                         GazeProgram.PACKAGING_STATIC,
                     )
                 ],
+                GazeProgram.ERROR_POSE: [
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
+                    )
+                ],
+                GazeProgram.LEFT_HANDOVER: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ],
+                GazeProgram.RIGHT_HANDOVER: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ],
+                GazeProgram.PACKAGING_STATIC: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ]
+            },
+            HandoverState.ERROR_RIGHT: {
+                GazeProgram.MOVE_TO_ERROR_RIGHT: [
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
+                        GazeProgram.MUTUAL_SHORT,
+                    ),
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ],
+                GazeProgram.MUTUAL_SHORT: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
+                    )
+                ],
+                GazeProgram.ERROR_POSE: [
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.LEFT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.RIGHT_HANDOVER,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        GazeProgram.PACKAGING_STATIC,
+                    )
+                ],
+                GazeProgram.LEFT_HANDOVER: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ],
+                GazeProgram.RIGHT_HANDOVER: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ],
+                GazeProgram.PACKAGING_STATIC: [
+                    (
+                        lambda u, c: u.gaze_program_finished == True,
+                        GazeProgram.ERROR_POSE,
+                    )
+                ]
+            },
+            HandoverState.ERROR_WAITING_LEFT: {
                 GazeProgram.MUTUAL_SHORT: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
@@ -624,21 +735,7 @@ class StateMachine:
                     )
                 ]
             },
-            HandoverState.ERROR_RIGHT: {
-                GazeProgram.MOVE_TO_ERROR_RIGHT: [
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                        GazeProgram.MUTUAL_SHORT,
-                    ),
-                    (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.UNSURE,
-                    ),
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
-                        GazeProgram.PACKAGING_STATIC,
-                    )
-                ],
+            HandoverState.ERROR_WAITING_RIGHT: {
                 GazeProgram.MUTUAL_SHORT: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
