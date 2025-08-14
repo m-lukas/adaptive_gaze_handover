@@ -421,7 +421,7 @@ while running:
             elif event.key == pygame.K_SPACE:
                 notify_keyboard_event("object_in_bowl") 
 
-            elif event.key == pygame.K_CLEAR:
+            elif event.key == pygame.K_BACKSPACE:
                 notify_keyboard_event("error_during_handover")
 
     dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
