@@ -680,10 +680,6 @@ class StateMachine:
             HandoverState.ERROR_WAITING_LEFT: {
                 GazeProgram.MUTUAL_SHORT: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.UNSURE,
-                    ),
-                    (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
                     ),
@@ -759,10 +755,6 @@ class StateMachine:
             },
             HandoverState.ERROR_WAITING_RIGHT: {
                 GazeProgram.MUTUAL_SHORT: [
-                    (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.UNSURE,
-                    ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
