@@ -117,19 +117,19 @@ programs = {
     ),
     "move_to_packaging_left": GazeProgram(
         saccades=[
-            TargetTransition(left_handover, 0),
+            TargetTransition(left_handover, 0.4),
             TargetTransition(packaging_common, 3, EaseFunction.SMOOTHSTEP),
         ],
     ),
     "move_to_packaging_right": GazeProgram(
         saccades=[
-            TargetTransition(right_handover, 0),
+            TargetTransition(right_handover, 0.4),
             TargetTransition(packaging_common, 2, EaseFunction.SMOOTHSTEP),
         ],
     ),
     "unsure": GazeProgram(
         saccades=[
-            TargetTransition(mutual, 0.2),
+            TargetTransition(mutual, 0.5),
             Delay(0.5),
             TargetTransition(left_handover, 0.5),
             Delay(0.5),
@@ -160,7 +160,7 @@ programs = {
     ),
     "ensuring_left": GazeProgram(
         saccades=[
-            TargetTransition(mutual, 0.2),
+            TargetTransition(mutual, 0.4),
             Delay(0.4),
             TargetTransition(left_handover, 0.5),
             Delay(0.4),
@@ -171,7 +171,7 @@ programs = {
     ),
     "ensuring_right": GazeProgram(
         saccades=[
-            TargetTransition(mutual, 0.2),
+            TargetTransition(mutual, 0.4),
             Delay(0.4),
             TargetTransition(right_handover, 0.5),
             Delay(0.4),
