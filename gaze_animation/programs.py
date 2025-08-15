@@ -256,5 +256,19 @@ programs = {
             TargetTransition(error_pose, 0.2),
             TargetTransition(right_handover, 2, EaseFunction.SMOOTHSTEP),
         ],
-    )
+    ),
+    "packaging_acknowledge_left": GazeProgram(
+        saccades=[
+            TargetTransition(left_handover, 0.2),
+            Delay(0.4),
+            TargetTransition(packaging_common, 0.2),
+        ],
+    ),
+    "packaging_acknowledge_right": GazeProgram(
+        saccades=[
+            TargetTransition(right_handover, 0.2),
+            Delay(0.4),
+            TargetTransition(packaging_common, 0.2),
+        ],
+    ),
 }
