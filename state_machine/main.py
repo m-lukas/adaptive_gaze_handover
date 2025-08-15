@@ -45,7 +45,7 @@ async def startup_event():
 def state_machine_loop() -> None:
     """Calls _process_update repeatedly in the background to trigger update-independent state changes"""
 
-    _process_update(StateUpdate())
+    _process_update(StateUpdate(state_loop_update=True))
 
 
 @app.on_event("shutdown")
