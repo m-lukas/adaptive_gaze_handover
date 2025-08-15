@@ -2,6 +2,7 @@ import os
 import uuid
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_utils.tasks import repeat_every
 from pydantic import BaseModel
 from fsm import (
     StateMachine, StateUpdate,
@@ -37,6 +38,15 @@ def print_config() -> None:
 async def startup_event():
     print("Starting State Machine ...\n")
     print_config()
+
+
+@app.on_event("startup")
+@repeat_every(seconds=1)
+def state_machine_loop() -> None:
+    """Calls _process_update repeatedly in the background to trigger update-independent state changes"""
+
+    _process_update(StateUpdate())
+
 
 @app.on_event("shutdown")
 def shutdown_event():
