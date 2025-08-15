@@ -94,6 +94,7 @@ class StateUpdate:
         gaze_program_finished: bool | None = None,
         new_gaze_target: GazeTarget | None = None,
         task_completed: bool | None = None,
+        state_loop_update: bool | None = None,
     ):
         self.handover_start_detected = handover_start_detected
         self.handover_finished = handover_finished
@@ -103,6 +104,7 @@ class StateUpdate:
         self.new_arm_location = new_arm_location
         self.new_gaze_target = new_gaze_target
         self.task_completed = task_completed
+        self.state_loop_update = state_loop_update
 
 
 class CurrentState:
@@ -292,7 +294,7 @@ class StateMachine:
             HandoverState.NO_ACTIVE_HANDOVER: {
                 GazeProgram.MUTUAL: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 3,
                         GazeProgram.UNSURE,
                     ),
                     (
@@ -332,7 +334,7 @@ class StateMachine:
                         GazeProgram.MUTUAL,
                     ),
                     (
-                        lambda u, c: u.gaze_program_finished == True,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 4,
                         GazeProgram.IDLE,
                     ),
                     (
@@ -350,7 +352,7 @@ class StateMachine:
                         GazeProgram.MUTUAL,
                     ),
                     (
-                        lambda u, c: u.gaze_program_finished == True,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 4,
                         GazeProgram.IDLE,
                     ),
                     (
@@ -386,7 +388,7 @@ class StateMachine:
                 ],
                 GazeProgram.PACKAGING_STATIC: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 4,
                         GazeProgram.IDLE,
                     ),
                     (
@@ -682,6 +684,10 @@ class StateMachine:
             HandoverState.ERROR_WAITING_LEFT: {
                 GazeProgram.MUTUAL: [
                     (
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 3,
+                        GazeProgram.UNSURE,
+                    ),
+                    (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
                     ),
@@ -697,7 +703,7 @@ class StateMachine:
                 GazeProgram.UNSURE: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL,
+                        GazeProgram.PACKAGING_STATIC,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -710,7 +716,7 @@ class StateMachine:
                 ],
                 GazeProgram.LEFT_HANDOVER: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 2,
                         GazeProgram.MUTUAL,
                     ),
                     (
@@ -724,8 +730,8 @@ class StateMachine:
                 ],
                 GazeProgram.RIGHT_HANDOVER: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 2,
+                        GazeProgram.LEFT_HANDOVER,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -738,8 +744,8 @@ class StateMachine:
                 ],
                 GazeProgram.PACKAGING_STATIC: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 2,
+                        GazeProgram.RIGHT_HANDOVER,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -758,6 +764,10 @@ class StateMachine:
             HandoverState.ERROR_WAITING_RIGHT: {
                 GazeProgram.MUTUAL: [
                     (
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 3,
+                        GazeProgram.UNSURE,
+                    ),
+                    (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
                         GazeProgram.LEFT_HANDOVER,
                     ),
@@ -773,7 +783,7 @@ class StateMachine:
                 GazeProgram.UNSURE: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL,
+                        GazeProgram.PACKAGING_STATIC,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -786,7 +796,7 @@ class StateMachine:
                 ],
                 GazeProgram.LEFT_HANDOVER: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 2,
                         GazeProgram.MUTUAL,
                     ),
                     (
@@ -800,8 +810,8 @@ class StateMachine:
                 ],
                 GazeProgram.RIGHT_HANDOVER: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 2,
+                        GazeProgram.LEFT_HANDOVER,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -814,8 +824,8 @@ class StateMachine:
                 ],
                 GazeProgram.PACKAGING_STATIC: [
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.MUTUAL,
+                        lambda u, c: (datetime.now()-c.last_gaze_update).total_seconds() >= 2,
+                        GazeProgram.RIGHT_HANDOVER,
                     ),
                     (
                         lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
@@ -959,7 +969,11 @@ class StateMachine:
     def update_state(self, u: StateUpdate) -> UpdatedState:
         changes = UpdatedState()
 
-        if not u.new_gaze_target and not u.gaze_program_finished:
+        if not any([
+            u.new_gaze_target,
+            u.gaze_program_finished,
+            u.state_loop_update
+        ]):
             for guard, dst_hs, new_arm, new_gaze in self.handover_state_transitions.get(self.state.current_handover_state, []):
                 if guard(u, self.state):
                     self.state.current_handover_state = dst_hs
@@ -983,7 +997,7 @@ class StateMachine:
 
         if (
             self.dynamic_gaze
-            and any([u.new_gaze_target, u.gaze_program_finished])
+            and any([u.new_gaze_target, u.gaze_program_finished, u.state_loop_update])
             and is_time_difference_exceeded(
                 self.state.last_gaze_update, GAZE_UPDATE_REFRESH_RATE_MS
             )
