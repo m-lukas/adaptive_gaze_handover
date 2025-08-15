@@ -5,9 +5,6 @@ from typing import Callable, Dict, List, Tuple
 from util import is_time_difference_exceeded
 
 
-GAZE_UPDATE_REFRESH_RATE_MS = 400
-
-
 class GazeProgram(Enum):
     IDLE = "idle"
     MOVE_TO_PERSON_LEFT = "move_to_person_left"
@@ -998,9 +995,6 @@ class StateMachine:
         if (
             self.dynamic_gaze
             and any([u.new_gaze_target, u.gaze_program_finished, u.state_loop_update])
-            and is_time_difference_exceeded(
-                self.state.last_gaze_update, GAZE_UPDATE_REFRESH_RATE_MS
-            )
         ):
             for guard, next_gp in self.dynamic_gaze_transitions.get(self.state.current_handover_state, {}).get(self.state.current_gaze_program, []):
                 if guard(u, self.state):
