@@ -90,11 +90,11 @@ programs = {
     "receiving_left": GazeProgram(
         saccades=[
             TargetTransition(left_handover, 0.5),
-            Delay(1),
-            TargetTransition(mutual, 1),
             Delay(0.5),
-            TargetTransition(left_handover, 1),
-            Delay(1.5),
+            TargetTransition(mutual, 0.5),
+            Delay(0.8),
+            TargetTransition(left_handover, 0.5),
+            Delay(1),
             # TargetTransition(mutual, 1),
             # Delay(0.5),
             # TargetTransition(left_handover, 1),
@@ -104,11 +104,11 @@ programs = {
     "receiving_right": GazeProgram(
         saccades=[
             TargetTransition(right_handover, 0.5),
-            Delay(1),
-            TargetTransition(mutual, 1),
             Delay(0.5),
-            TargetTransition(right_handover, 1),
-            Delay(1.5),
+            TargetTransition(mutual, 0.5),
+            Delay(0.8),
+            TargetTransition(right_handover, 0.5),
+            Delay(1),
             # TargetTransition(mutual, 1),
             # Delay(0.5),
             # TargetTransition(right_handover, 1),
