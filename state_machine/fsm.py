@@ -838,33 +838,37 @@ class StateMachine:
                         GazeProgram.MUTUAL_SHORT,
                     ),
                     (
-                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
-                        GazeProgram.PACKAGING_STATIC,
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_LEFT,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_RIGHT,
                     )
                 ],
                 GazeProgram.MUTUAL_SHORT: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
-                    )
-                ],
-                GazeProgram.PACKAGING_STATIC: [
+                    ),
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.TRAYS,
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_LEFT,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_RIGHT,
                     )
                 ],
-                GazeProgram.TRAYS: [
+                GazeProgram.PACKAGING_ACKNOWLEDGE_LEFT: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
-                    ),
+                    )
+                ],
+                GazeProgram.PACKAGING_ACKNOWLEDGE_RIGHT: [
                     (
-                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                        GazeProgram.MUTUAL_SHORT,
-                    ),
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
                     )
                 ]
@@ -876,33 +880,37 @@ class StateMachine:
                         GazeProgram.MUTUAL_SHORT,
                     ),
                     (
-                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
-                        GazeProgram.PACKAGING_STATIC,
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_LEFT,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_RIGHT,
                     )
                 ],
                 GazeProgram.MUTUAL_SHORT: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
-                    )
-                ],
-                GazeProgram.PACKAGING_STATIC: [
+                    ),
                     (
-                        lambda u, c: u.gaze_program_finished == True,
-                        GazeProgram.TRAYS,
+                        lambda u, c: u.new_gaze_target == GazeTarget.LEFT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_LEFT,
+                    ),
+                    (
+                        lambda u, c: u.new_gaze_target == GazeTarget.RIGHT_HANDOVER_LOCATION,
+                        GazeProgram.PACKAGING_ACKNOWLEDGE_RIGHT,
                     )
                 ],
-                GazeProgram.TRAYS: [
+                GazeProgram.PACKAGING_ACKNOWLEDGE_LEFT: [
                     (
                         lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
-                    ),
+                    )
+                ],
+                GazeProgram.PACKAGING_ACKNOWLEDGE_RIGHT: [
                     (
-                        lambda u, c: u.new_gaze_target == GazeTarget.ROBOT_FACE,
-                        GazeProgram.MUTUAL_SHORT,
-                    ),
-                    (
-                        lambda u, c: u.new_gaze_target == GazeTarget.PACKAGING_AREA,
+                        lambda u, c: u.gaze_program_finished == True,
                         GazeProgram.PACKAGING_STATIC,
                     )
                 ]
