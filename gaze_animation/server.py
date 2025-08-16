@@ -74,7 +74,7 @@ movements_index = 0
 app = Flask(__name__)
 
 animation_lock = threading.Lock()
-current_command = {"program": programs["idle"], "elapsed": 0, "current_pos": [0, 0]}
+current_command = {"program": copy.copy(programs["idle"]), "elapsed": 0, "current_pos": [0, 0]}
 
 
 def _build_cors_preflight_response():
