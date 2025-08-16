@@ -199,16 +199,16 @@ programs = {
     ),
     "emphasize_left": GazeProgram(
         saccades=[
-            TargetTransition(right_handover, 0.4),
-            Delay(0.2),
+            TargetTransition(right_handover, 0.3),
+            Delay(0.1),
             TargetTransition(left_handover, 0.4),
             Delay(0.8),
         ],
     ),
     "emphasize_right": GazeProgram(
         saccades=[
-            TargetTransition(left_handover, 0.4),
-            Delay(0.2),
+            TargetTransition(left_handover, 0.3),
+            Delay(0.1),
             TargetTransition(right_handover, 0.4),
             Delay(0.8),
         ],
