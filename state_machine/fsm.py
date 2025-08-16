@@ -992,15 +992,10 @@ class StateMachine:
             changes.gaze_program = self.state.current_gaze_program
             return changes
 
-        if u.state_loop_update:
-                print("HERE")
-
         if (
             self.dynamic_gaze
             and any([u.new_gaze_target, u.gaze_program_finished, u.state_loop_update])
         ):
-            if u.state_loop_update:
-                print((datetime.now()-self.state.last_gaze_update).total_seconds())
             for guard, next_gp in self.dynamic_gaze_transitions.get(self.state.current_handover_state, {}).get(self.state.current_gaze_program, []):
                 if guard(u, self.state):
                     self.state.current_gaze_program = next_gp
