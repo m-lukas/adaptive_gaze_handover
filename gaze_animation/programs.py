@@ -51,13 +51,13 @@ left_handover = Target(-0.5, 0.8)
 right_handover = Target(0.4, 0.8)
 mutual = Target(0, 0.2)
 center_handover = Target(0, 1)
-error_pose = Target(0.3, 0.3)
+error_pose = Target(0.4, 0.4)
 
 
 programs = {
     "idle": GazeProgram(
         saccades=[
-            Transition(-1, -1, 0.8),
+            Transition(-0.6, -0.8, 0.8),
             Delay(1.5),
             Transition(-1, 0, 1.5),
             Delay(1),
@@ -71,8 +71,8 @@ programs = {
             Delay(1),
             Transition(-0.5, -1, 0.4),
             Delay(2),
-            Transition(0, 0.2, 1.2),
-            Delay(1),
+            TargetTransition(mutual, 1.2),
+            Delay(0.5),
         ],
     ),
     "move_to_person_left": GazeProgram(
@@ -130,7 +130,7 @@ programs = {
     "unsure": GazeProgram(
         saccades=[
             TargetTransition(mutual, 0.5),
-            Delay(0.5),
+            Delay(0.3),
             TargetTransition(left_handover, 0.5),
             Delay(0.5),
             TargetTransition(right_handover, 0.5),
@@ -160,8 +160,6 @@ programs = {
     ),
     "ensuring_left": GazeProgram(
         saccades=[
-            TargetTransition(mutual, 0.4),
-            Delay(0.4),
             TargetTransition(left_handover, 0.5),
             Delay(0.4),
             TargetTransition(packaging_common, 0.8),
@@ -171,8 +169,6 @@ programs = {
     ),
     "ensuring_right": GazeProgram(
         saccades=[
-            TargetTransition(mutual, 0.4),
-            Delay(0.4),
             TargetTransition(right_handover, 0.5),
             Delay(0.4),
             TargetTransition(packaging_common, 0.8),
@@ -203,21 +199,17 @@ programs = {
     ),
     "emphasize_left": GazeProgram(
         saccades=[
-            TargetTransition(left_handover, 0.5),
-            Delay(0.8),
-            TargetTransition(mutual, 0.4),
-            Delay(0.4),
-            TargetTransition(left_handover, 0.5),
+            TargetTransition(right_handover, 0.4),
+            Delay(0.2),
+            TargetTransition(left_handover, 0.4),
             Delay(0.8),
         ],
     ),
     "emphasize_right": GazeProgram(
         saccades=[
-            TargetTransition(right_handover, 0.5),
-            Delay(0.8),
-            TargetTransition(mutual, 0.4),
-            Delay(0.4),
-            TargetTransition(right_handover, 0.5),
+            TargetTransition(left_handover, 0.4),
+            Delay(0.2),
+            TargetTransition(right_handover, 0.4),
             Delay(0.8),
         ],
     ),
