@@ -452,11 +452,17 @@ while running:
             with animation_lock:
                 current_command["elapsed"] = 0
                 if program.index < len(program.saccades) - 1:
-                    program.start_pos = current_command["current_pos"][:]
-                    program.index += 1
+                        program.start_pos = current_command["current_pos"][:]
+                        program.index += 1
                 else:
-                    notify_gaze_program_finished()
-                    current_command["program"] = None
+                    try:
+                        notify_gaze_program_finished()
+                        current_command["program"] = None
+                    except Exception:
+                        program = copy.copy(programs["idle"])
+                        program.start_pos = current_command["current_pos"]
+                        current_command.update({"program": program, "elapsed": 0})
+
 
     animate_gaze(current_command["current_pos"])
 

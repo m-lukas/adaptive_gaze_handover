@@ -8,7 +8,7 @@ def notify_gaze_program_finished():
         print("Sent to state machine: gaze_program_finished")
     except Exception as e:
         print("ERROR while sending data to state_machine: ", str(e))
-        pass
+        raise
 
 
 def notify_keyboard_event(event_name: str):
