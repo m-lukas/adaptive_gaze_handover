@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable, Dict, List, Tuple
 
+from data_logger import DataLogger
 from util import is_time_difference_exceeded
 
 
@@ -142,7 +143,8 @@ GazeTransition = Tuple[
 
 
 class StateMachine:
-    def __init__(self, dynamic_gaze: bool):
+    def __init__(self, logger: DataLogger, dynamic_gaze: bool):
+        self.logger = logger
         self.dynamic_gaze = dynamic_gaze
 
         self.state = CurrentState(
@@ -984,6 +986,13 @@ class StateMachine:
 
             if u.new_arm_location:
                 self.state.last_arm_location = u.new_arm_location
+            
+        if u.handover_start_detected and changes.handover_state in [HandoverState.MOVING_TO_PERSON_LEFT, HandoverState.MOVING_TO_PERSON_RIGHT]:
+            self.logger.log_handover_initiation()
+        elif u.object_in_bowl and changes.handover_state in [HandoverState.MOVING_TO_PACKAGING_LEFT, HandoverState.MOVING_TO_PACKAGING_RIGHT]:
+            self.logger.log_object_in_bowl()
+        elif u.error_during_handover and changes.handover_state in [HandoverState.ERROR_LEFT, HandoverState.ERROR_RIGHT]:
+            self.logger.log_handover_error()
 
         if not self.dynamic_gaze and changes.handover_state:
             self.state.current_gaze_program = self.static_gaze_map[

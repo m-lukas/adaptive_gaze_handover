@@ -26,8 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sm = StateMachine(dynamic_gaze=dynamic_gaze)
 logger = DataLogger(participant_identifier=participant_identifier, dynamic_gaze=dynamic_gaze, demonstration=demonstration)
+sm = StateMachine(logger=logger, dynamic_gaze=dynamic_gaze)
 
 def print_config() -> None:
     print(f"Identifier: {participant_identifier}")
@@ -64,7 +64,7 @@ class ArmLocationPayload(BaseModel):
     location: ArmLocation
 
 class EventPayload(BaseModel):
-    name: str  # must be "handover_start_detected" or "object_in_bowl"
+    name: str
 
 @app.get("/", status_code=200)
 async def status():
@@ -99,16 +99,12 @@ async def update_gaze_target(data: GazeTargetPayload, bg: BackgroundTasks):
 @app.post("/event", status_code=202)
 async def trigger_event(data: EventPayload, bg: BackgroundTasks):
     if data.name == "handover_start_detected_left":
-        logger.log_handover_initiation()
         upd = StateUpdate(handover_start_detected=HandoverInitiatedTray.LEFT)
     elif data.name == "handover_start_detected_right":
-        logger.log_handover_initiation()
         upd = StateUpdate(handover_start_detected=HandoverInitiatedTray.RIGHT)
     elif data.name == "object_in_bowl":
-        logger.log_object_in_bowl()
         upd = StateUpdate(object_in_bowl=True)
     elif data.name == "error_during_handover":
-        logger.log_handover_error()
         upd = StateUpdate(error_during_handover=True)
     elif data.name == "handover_finished":
         upd = StateUpdate(handover_finished=True)
