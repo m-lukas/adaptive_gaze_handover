@@ -12,7 +12,7 @@ import cv2
 from pygaze import PyGaze, PyGazeRenderer
 
 
-FIXATION_TIME_THRESHOLD = 0.1
+FIXATION_TIME_THRESHOLD = 0.15
 STATE_MACHINE_URL = "http://0.0.0.0:1111/gaze_target"
 SHOW_IMAGE = False
 
