@@ -30,7 +30,7 @@ class GazeProgram(Enum):
     ENSURING_RIGHT = "ensuring_right"
     MUTUAL_SHORT = "mutual_short"
     TRAYS = "trays"
-    PACKAGING = "packaging",
+    PACKAGING = "packaging"
     PACKAGING_ACKNOWLEDGE_LEFT = "packaging_acknowledge_left"
     PACKAGING_ACKNOWLEDGE_RIGHT = "packaging_acknowledge_right"
 
