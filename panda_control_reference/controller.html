@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Franka Panda Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    button {
+      flex: 1 1 45%;
+      padding: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #666;
+      background-color: #f5f5f5;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    button:hover {
+      background-color: #e0e0e0;
+      border-color: #444;
+    }
+    #output {
+      white-space: pre-wrap;
+      padding: 12px;
+      border: 1px solid #ccc;
+      background-color: #fafafa;
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Franka Panda Controller</h1>
+
+  <div class="buttons">
+    <!-- Buttons trigger each program -->
+    <button data-program="move_to_left_tray">Move to Left Tray</button>
+    <button data-program="move_to_right_tray">Move to Right Tray</button>
+    <button data-program="move_to_packaging">Move to Packaging</button>
+    <button data-program="move_to_idle">Move to Idle</button>
+    <button data-program="wink">Wink</button>
+    <button data-program="home">Home Robot</button>
+    <button data-program="prepare_experiment">Prepare Experiment</button>
+    <button data-program="end_experiment">End Experiment</button>
+    <button data-program="full_test">Full Test</button>
+  </div>
+
+  <div id="output">Click a button to start a program...</div>
+
+  <script>
+    // Send POST request to start the selected program
+    function startProgram(program) {
+      const url = 'http://0.0.0.0:3333/start';
+      const payload = { program: program };
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        // Read response text (could be JSON or plain)
+        return response.text().then(text => {
+          // Display status code and response body
+          document.getElementById('output').textContent =
+            'Status: ' + response.status + '\n' + text;
+        });
+      })
+      .catch(error => {
+        // Network or other errors
+        document.getElementById('output').textContent =
+          'Error: ' + error;
+      });
+    }
+
+    // Attach click handlers to all buttons
+    document.querySelectorAll('button[data-program]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        startProgram(btn.getAttribute('data-program'));
+      });
+    });
+  </script>
+</body>
+</html>
