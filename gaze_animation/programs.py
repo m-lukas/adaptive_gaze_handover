@@ -95,10 +95,6 @@ programs = {
             Delay(0.8),
             TargetTransition(left_handover, 0.5),
             Delay(1),
-            # TargetTransition(mutual, 1),
-            # Delay(0.5),
-            # TargetTransition(left_handover, 1),
-            # Delay(1),
         ],
     ),
     "receiving_right": GazeProgram(
@@ -109,10 +105,6 @@ programs = {
             Delay(0.8),
             TargetTransition(right_handover, 0.5),
             Delay(1),
-            # TargetTransition(mutual, 1),
-            # Delay(0.5),
-            # TargetTransition(right_handover, 1),
-            # Delay(1),
         ],
     ),
     "move_to_packaging_left": GazeProgram(
