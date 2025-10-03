@@ -25,7 +25,7 @@ while true; do
         positions=${joint_line#"$prefix"}
         positions=${positions%"$suffix"}
         commands+=("move_to_pose(move_group, $positions)")
-        echo "✔️  Recorded."
+        echo "Recorded."
     else
         echo "Error: Could not extract joint positions from /joint_states"
         exit 1
@@ -33,7 +33,7 @@ while true; do
 done
 
 echo ""
-echo "📋 Recorded movement commands:"
+echo "Recorded movement commands:"
 output=""
 for cmd in "${commands[@]}"; do
     echo "$cmd"
