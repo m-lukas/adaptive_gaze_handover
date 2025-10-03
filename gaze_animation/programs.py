@@ -5,8 +5,8 @@ from ease_functions import EaseFunction
 
 class Target:
     def __init__(self, x: float, y: float):
-      self.x = x
-      self.y = y
+        self.x = x
+        self.y = y
 
 
 class Transition:
@@ -39,7 +39,7 @@ class Delay:
 
 
 class GazeProgram:
-    def __init__(self, saccades: List[Transition | Delay], start_pos: tuple = [0,0]):
+    def __init__(self, saccades: List[Transition | Delay], start_pos: tuple = [0, 0]):
         self.saccades = saccades
         self.start_pos = start_pos
         self.index = 0
@@ -133,22 +133,13 @@ programs = {
         ],
     ),
     "mutual": GazeProgram(
-        saccades=[
-            TargetTransition(mutual, 0.5),
-            Delay(2)
-        ],
+        saccades=[TargetTransition(mutual, 0.5), Delay(2)],
     ),
     "gaze_left_handover": GazeProgram(
-        saccades=[
-            TargetTransition(left_handover, 0.5),
-            Delay(0.5)
-        ],
+        saccades=[TargetTransition(left_handover, 0.5), Delay(0.5)],
     ),
     "gaze_right_handover": GazeProgram(
-        saccades=[
-            TargetTransition(right_handover, 0.5),
-            Delay(0.5)
-        ],
+        saccades=[TargetTransition(right_handover, 0.5), Delay(0.5)],
     ),
     "ensuring_left": GazeProgram(
         saccades=[

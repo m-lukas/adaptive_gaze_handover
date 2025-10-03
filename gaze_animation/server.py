@@ -20,7 +20,7 @@ pygame.init()
 WIDTH = 1024
 HEIGHT = 768
 TICKS_PER_SECOND = 60
-screen = pygame.display.set_mode((0,0), pygame.NOFRAME)
+screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
 pygame.display.set_caption("LARO")
 
 # Farben definieren
@@ -74,14 +74,18 @@ movements_index = 0
 app = Flask(__name__)
 
 animation_lock = threading.Lock()
-current_command = {"program": copy.copy(programs["idle"]), "elapsed": 0, "current_pos": [0, 0]}
+current_command = {
+    "program": copy.copy(programs["idle"]),
+    "elapsed": 0,
+    "current_pos": [0, 0],
+}
 
 
 def _build_cors_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add('Access-Control-Allow-Headers', "*")
-    response.headers.add('Access-Control-Allow-Methods', "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
 
@@ -150,25 +154,25 @@ def looking_straight():
 
 def draw_solid_arc(surface, color, rect, start_angle, stop_angle, width, segments=40):
     cx, cy = rect.center
-    rx, ry = rect.width/2, rect.height/2
+    rx, ry = rect.width / 2, rect.height / 2
     inner_rx = rx - width
     inner_ry = ry - width
 
     # Build outer arc points from start → stop
     outer = []
-    for i in range(segments+1):
-        theta = start_angle + (stop_angle - start_angle) * (i/segments)
+    for i in range(segments + 1):
+        theta = start_angle + (stop_angle - start_angle) * (i / segments)
         x = cx + rx * math.cos(theta)
         y = cy + ry * math.sin(theta)
-        outer.append((x,y))
+        outer.append((x, y))
 
     # Build inner arc back from stop → start
     inner = []
-    for i in range(segments+1):
-        theta = stop_angle - (stop_angle - start_angle) * (i/segments)
+    for i in range(segments + 1):
+        theta = stop_angle - (stop_angle - start_angle) * (i / segments)
         x = cx + inner_rx * math.cos(theta)
         y = cy + inner_ry * math.sin(theta)
-        inner.append((x,y))
+        inner.append((x, y))
 
     pts = outer + inner
     pygame.draw.polygon(surface, color, pts)
@@ -226,7 +230,7 @@ def draw_brows():
 
 
 def draw_mouth():
-    MOUTH_RECT = pygame.Rect((WIDTH/2 - 100, HEIGHT * 0.65), (200, 100))
+    MOUTH_RECT = pygame.Rect((WIDTH / 2 - 100, HEIGHT * 0.65), (200, 100))
     draw_solid_arc(screen, MOUTH, MOUTH_RECT, math.pi, 0, 15, segments=120)
 
 
@@ -417,7 +421,7 @@ while running:
                 notify_keyboard_event("handover_start_detected_right")
 
             elif event.key == pygame.K_SPACE:
-                notify_keyboard_event("object_in_bowl") 
+                notify_keyboard_event("object_in_bowl")
 
             elif event.key == pygame.K_BACKSPACE:
                 notify_keyboard_event("error_during_handover")
@@ -452,8 +456,8 @@ while running:
             with animation_lock:
                 current_command["elapsed"] = 0
                 if program.index < len(program.saccades) - 1:
-                        program.start_pos = current_command["current_pos"][:]
-                        program.index += 1
+                    program.start_pos = current_command["current_pos"][:]
+                    program.index += 1
                 else:
                     try:
                         notify_gaze_program_finished()
@@ -462,7 +466,6 @@ while running:
                         program = copy.copy(programs["idle"])
                         program.start_pos = current_command["current_pos"]
                         current_command.update({"program": program, "elapsed": 0})
-
 
     animate_gaze(current_command["current_pos"])
 
