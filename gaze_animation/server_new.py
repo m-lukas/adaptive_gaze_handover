@@ -175,21 +175,22 @@ class GazeEngine:
 
         self.screen.fill(BG)
 
-        # Zwinker-Logik Start
+        # Initiate blinking
         if not self.is_blinking and current_time - self.blink_timer > self.blink_interval:
-            self.is_blinking = True  # Zwinker-Sequenz beginnt
-            self.saved_lid_height = self.lid_height  # Speichere aktuellen Augenlid-Zustand
+            self.is_blinking = True
+            self.saved_lid_height = self.lid_height
             self.blink_timer = current_time
 
-        # Zwinkern animieren
+        # Animate blinking
         if self.is_blinking:
-            # Augen schliessen
-            if current_time - self.blink_timer > BLINK_DURATION:  # Augen wieder oeffnen
+            # Eyes are closed
+            if current_time - self.blink_timer > BLINK_DURATION:
+                # Eyes will be open in next frame
                 self.lid_height = self.saved_lid_height
-                self.is_blinking = False  # Zwinker-Sequenz beendet
+                self.is_blinking = False
                 self.blink_interval = np.random.normal(
                     6000, 2500
-                )  # Setze Blink-Interval auf Zufalls wert 6s +-3
+                )
         else:
             self.is_blinking = False
             self.draw_eyes()
@@ -197,6 +198,7 @@ class GazeEngine:
         self.draw_brows()
         self.draw_mouth()
 
+    # Main Loop
     def run(self):
         clock = pygame.time.Clock()
         running = True
@@ -250,6 +252,7 @@ class GazeEngine:
         pygame.quit()
         sys.exit()
 
+# Create Flask app (web server)
 def create_app(engine):
     """Create Flask app with injected engine state."""
     app = Flask(__name__)
@@ -292,6 +295,7 @@ def create_app(engine):
 
     return app
 
+# Entry point of program
 def main():
     os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
     pygame.init()

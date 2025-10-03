@@ -17,20 +17,21 @@ from programs import GazeProgram, Transition, programs
 os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
 pygame.init()
 
+# Configure Window
 WIDTH = 1024
 HEIGHT = 768
 TICKS_PER_SECOND = 60
 screen = pygame.display.set_mode((0, 0), pygame.NOFRAME)
 pygame.display.set_caption("LARO")
 
-# Farben definieren
+# Colors
 BG = (135, 135, 135)
 MOUTH = (53, 71, 73)
 LID = (4.5, 37.1, 44.1)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-# Variablen fuer die Augenposition und Blickrichtung
+# Global Variables for Eyes
 eye_radius = 200
 eye_radius_ = 350
 pupil_radius = 50
@@ -39,15 +40,13 @@ eye_right_pos = ((0.75 * WIDTH) - eye_radius_ * 0.5, HEIGHT / 2 - eye_radius / 2
 pupil_offset = [0, 150]  # current offset
 max_pupil_offsets = [75, 35]  # Ausweichpos der Pupillen (x,y)
 
-lid_height = 0  # Hoehe des Augenlids (0 bedeutet offen)
-saved_lid_height = 0
-
-# Variablen fuer das Augenlid
+# Global Variables for Lid
 lid_height = 0  # Hoehe des Augenlids (0 bedeutet offen)
 saved_lid_height = 0  # Speichert den Zustand des Augenlids vor dem Zwinkern
 lid_hor_delta = 10
 lid_vert_delta = 5
 
+# Global Variables for Brow
 brow_delta = {
     "up": (0, -1 * lid_hor_delta),
     "down": (0, 4 * lid_hor_delta),
@@ -55,24 +54,25 @@ brow_delta = {
     "right": (lid_vert_delta, 0),
 }
 
-# Zwinker-Variablen
+# Global Variables for Blinking
 blink_timer = 0
 blink_duration = 100
 blink_interval = np.random.normal(
     6000, 2500
-)  # Setze Blink-Interval auf Zufalls wert 6s +-3
+)  # Interval: 6s +- 2.5s
 is_blinking = False
 
-# Bewegungskontrolle
 looking_up = False
 looking_down = False
 looking_left = False
 looking_right = False
 
+# Index of current Gaze Program
 movements_index = 0
 
 app = Flask(__name__)
 
+# Current Gaze Program
 animation_lock = threading.Lock()
 current_command = {
     "program": copy.copy(programs["idle"]),
@@ -80,7 +80,7 @@ current_command = {
     "current_pos": [0, 0],
 }
 
-
+# CORS - important for Panda Experiment Controller
 def _build_cors_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -88,12 +88,11 @@ def _build_cors_preflight_response():
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
-
 def _corsify_actual_response(response, status_code=200):
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response, status_code
 
-
+# Health Route
 @app.route("/", methods=["GET", "OPTIONS"])
 def status():
     if request.method == "OPTIONS":
@@ -101,7 +100,7 @@ def status():
 
     return _corsify_actual_response(jsonify({"status": "ok"}))
 
-
+# Route for triggering Programs
 @app.route("/trigger", methods=["POST", "OPTIONS"])
 def trigger():
     if request.method == "OPTIONS":
@@ -122,7 +121,7 @@ def trigger():
 
         return _corsify_actual_response(jsonify({"program": name}))
 
-
+# Route for triggering eye movement to specific coordinates
 @app.route("/move", methods=["POST"])
 def move():
     global current_command
@@ -152,13 +151,14 @@ def looking_straight():
     return not any([looking_up, looking_down, looking_left, looking_right])
 
 
+# Helper function for drawing mouth
 def draw_solid_arc(surface, color, rect, start_angle, stop_angle, width, segments=40):
     cx, cy = rect.center
     rx, ry = rect.width / 2, rect.height / 2
     inner_rx = rx - width
     inner_ry = ry - width
 
-    # Build outer arc points from start → stop
+    # Outer Arc
     outer = []
     for i in range(segments + 1):
         theta = start_angle + (stop_angle - start_angle) * (i / segments)
@@ -166,7 +166,7 @@ def draw_solid_arc(surface, color, rect, start_angle, stop_angle, width, segment
         y = cy + ry * math.sin(theta)
         outer.append((x, y))
 
-    # Build inner arc back from stop → start
+    # Inner Arc
     inner = []
     for i in range(segments + 1):
         theta = stop_angle - (stop_angle - start_angle) * (i / segments)
@@ -178,13 +178,15 @@ def draw_solid_arc(surface, color, rect, start_angle, stop_angle, width, segment
     pygame.draw.polygon(surface, color, pts)
 
 
+# Animate brows
 def draw_brows():
     brow_offset = [0, 0]
     if looking_up:
         brow_offset[1] = brow_delta["up"][1]
     if looking_down or is_blinking:
         brow_offset[1] = brow_delta["down"][1]
-    # Brows horizontal movement
+    
+    # Horizontal movement of brows
     if looking_left:
         brow_offset[0] = brow_delta["left"][0]
     if looking_right:
@@ -193,7 +195,6 @@ def draw_brows():
     BROW1 = None
     BROW2 = None
 
-    # Brow
     if looking_straight() and not is_blinking:
         BROW1 = pygame.Rect((eye_left_pos[0] - 50, 100), (eye_radius_ * 1.3, 200))
         BROW2 = pygame.Rect((eye_right_pos[0] - 50, 100), (eye_radius_ * 1.3, 200))
@@ -229,13 +230,16 @@ def draw_brows():
     )
 
 
+# Animate mouth
 def draw_mouth():
     MOUTH_RECT = pygame.Rect((WIDTH / 2 - 100, HEIGHT * 0.65), (200, 100))
     draw_solid_arc(screen, MOUTH, MOUTH_RECT, math.pi, 0, 15, segments=120)
 
 
+# Animate eyes
 def draw_eyes():
-    # Augen zeichnen
+
+    # Draw white background 
     pygame.draw.ellipse(
         screen, WHITE, [eye_left_pos[0], eye_left_pos[1], eye_radius_, eye_radius]
     )
@@ -243,7 +247,7 @@ def draw_eyes():
         screen, WHITE, [eye_right_pos[0], eye_right_pos[1], eye_radius_, eye_radius]
     )
 
-    # Verdeckungsbox
+    # Lids
     if looking_down:
         pygame.draw.rect(
             screen,
@@ -320,7 +324,7 @@ def draw_eyes():
             ],
         )
 
-    # Pupillenposition basierend auf der Blickrichtung
+    # Calculate position and draw pupils
     left_pupil_pos = (
         eye_left_pos[0] + eye_radius_ / 2 + pupil_offset[0],
         eye_left_pos[1] + eye_radius / 2 + pupil_offset[1],
@@ -332,7 +336,6 @@ def draw_eyes():
     pygame.draw.circle(screen, BLACK, left_pupil_pos, pupil_radius)
     pygame.draw.circle(screen, BLACK, right_pupil_pos, pupil_radius)
 
-    # if (looking_down or looking_up) and (looking_left or looking_right):
     left_mini_pupil_pos = (
         left_pupil_pos[0] + 0.71 * pupil_offset[0] / 2,
         left_pupil_pos[1] + 0.71 * pupil_offset[1],
@@ -346,6 +349,7 @@ def draw_eyes():
     pygame.draw.circle(screen, WHITE, right_mini_pupil_pos, pupil_radius / 5)
 
 
+# Animate robot face for this frame
 def animate_gaze(coordinates):
     global looking_left, looking_right, looking_up, looking_down, looking_straight, is_blinking, blink_timer, blink_interval, saved_lid_height, lid_height
 
@@ -361,24 +365,25 @@ def animate_gaze(coordinates):
 
     screen.fill(BG)
 
-    # Zwinker-Logik Start
+    # Blinking Initiation
     if not is_blinking and current_time - blink_timer > blink_interval:
-        is_blinking = True  # Zwinker-Sequenz beginnt
-        saved_lid_height = lid_height  # Speichere aktuellen Augenlid-Zustand
+        is_blinking = True
+        saved_lid_height = lid_height
         blink_timer = current_time
 
-    # Zwinkern animieren
+    # Blinking animation
     if is_blinking:
-        # Augen schliessen
-        if current_time - blink_timer > blink_duration:  # Augen wieder oeffnen
+        if current_time - blink_timer > blink_duration:
+            # Eyes are closed in this frame but will be open in the next frame
             lid_height = (
-                saved_lid_height  # Augenlider zum urspruenglichen Zustand zurueck
+                saved_lid_height
             )
-            is_blinking = False  # Zwinker-Sequenz beendet
+            is_blinking = False
             blink_interval = np.random.normal(
                 6000, 2500
-            )  # Setze Blink-Interval auf Zufalls wert 6s +-3
+            )
     else:
+        # Open Eyes
         is_blinking = False
         draw_eyes()
 
@@ -386,24 +391,23 @@ def animate_gaze(coordinates):
     draw_mouth()
 
 
+# Run web server
 def run_flask():
     app.run(port=2222)
 
-
-# ----- Start Flask in a thread -----
 flask_thread = threading.Thread(target=run_flask, daemon=True)
 flask_thread.start()
 
 
-# Main loop
-base_interval = 3  # Mittelwert (in Sekunden)
-std_dev = 1  # Standardabweichung (in Sekunden)
+# --- Animation Loop ---
+base_interval = 3
+std_dev = 1
 running = True
 last_update_time = time.time()
 next_update_interval = max(0, random.gauss(base_interval, std_dev))
 running = True
 while running:
-    current_time = pygame.time.get_ticks()  # Zeit in Millisekunden
+    current_time = pygame.time.get_ticks()
     curr_t = time.time()
 
     for event in pygame.event.get():
@@ -414,6 +418,7 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
+            # Check for keyboard inputs and trigger events
             elif event.key == pygame.K_LEFT:
                 notify_keyboard_event("handover_start_detected_left")
 
@@ -426,8 +431,9 @@ while running:
             elif event.key == pygame.K_BACKSPACE:
                 notify_keyboard_event("error_during_handover")
 
-    dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0  # dt in seconds
+    dt = pygame.time.Clock().tick(TICKS_PER_SECOND) / 1000.0
 
+    # Animate frame for current program + Logic to transition between / end programs
     program: GazeProgram | None = current_command["program"]
     if program:
         current_step = program.saccades[program.index]
@@ -453,12 +459,15 @@ while running:
                     + (current_step.y - program.start_pos[1]) * eased_t
                 )
         else:
+            # Duration of saccade / gaze transition is exceeded
             with animation_lock:
                 current_command["elapsed"] = 0
                 if program.index < len(program.saccades) - 1:
+                    # Go to next saccade
                     program.start_pos = current_command["current_pos"][:]
                     program.index += 1
                 else:
+                    # Finish gaze program
                     try:
                         notify_gaze_program_finished()
                         current_command["program"] = None
