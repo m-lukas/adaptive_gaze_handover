@@ -2,6 +2,9 @@
 
 # How to Run
 
+
+STRG + SHIFT + C/V
+
 ### Prepare System
 - Laptop
 - Connection to Robot
