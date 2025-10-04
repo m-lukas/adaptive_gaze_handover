@@ -1,20 +1,34 @@
 # Adaptive Gaze Handover - Master Thesis
 
-# How to Run
+## Project Overview
 
+| Component | Description | Link |
+|---|---|---|
+| gaze_animation | Code for Gaze Animation. | [Link](./gaze_animation) |
+| gaze_tracking | Code for Gaze Tracking. | [Link](./gaze_tracking) |
+| other_material | Supplementary material including scales, transition overview, photos, videos and analysis scripts. | [Link](./other_material) |
+| panda_control_reference | Copy of panda_control code. Needs to be installed in the same catkin workspace as panda_moveit. | [Link](./panda_control_reference) |
+| read_poses | Script for reading robot poses and returning Python code. | [Link](./read_poses) |
+| state_machine | Code for State Machine. | [Link](./state_machine) |
+| controller.html | Panda Experiment Controller script. |  |
 
-STRG + SHIFT + C/V
+## Prepare System (only required for laptops that run the setup for the first time)
 
-### Prepare System
-- Laptop
-- Connection to Robot
-- franka_ros from source
-- libfranka from source
-- panda_moveit
-- poetry
-- globally install rospy
+- Setup Laptop (Ubuntu 20.04 LTS) and patch Kernel to PREEMPT_RT
+- Install ROS Noetic: [https://wiki.ros.org/noetic/Installation/Ubuntu](https://wiki.ros.org/noetic/Installation/Ubuntu)
+- Install libfranka from source: [https://github.com/frankaemika/libfranka?tab=readme-ov-file#getting-started](https://github.com/frankaemika/libfranka?tab=readme-ov-file#getting-started)
+- Install franka_ros from source: [https://frankaemika.github.io/docs/installation_linux.html#building-the-ros-packages](https://frankaemika.github.io/docs/installation_linux.html#building-the-ros-packages)
+  - `catkin_make -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build`
+- Setup network connection for Panda
+- Install panda_moveit: [https://moveit.github.io/moveit_tutorials/doc/getting_started/getting_started.html#](https://moveit.github.io/moveit_tutorials/doc/getting_started/getting_started.html#)
+- Make sure to have the latest python and pip versions installed
+- Install [poetry](https://python-poetry.org/docs/) and [poetry shell plugin](https://github.com/python-poetry/poetry-plugin-shell) 
+- Using pip, globally install rospy
 
-### Starting the System
+## Running the Experiment
+
+> Hint: You can use `STRG + SHIFT + C/V` to copy/paste in the Terminal
+
 1. Plug in robot, display and laptop.
 2. Turn on robot server (below the table) using the switch on the side. You should hear a click and noise from the fans. If the fans are not audible, make sure emergency button is not locked.
 3. Turn on laptop and wait until Login appears.
@@ -68,8 +82,7 @@ STRG + SHIFT + C/V
     4.  For every participant, open the files `demo.env` (for demonstration trials) and `prod.env` (for experimental trials) in `~/adaptive_gaze_handover/state_machine` and update the state machine configuration (participant id, dynamic (adaptive) gaze: true/false). Alternatively, this can be also done after starting the State Machine using the Panda Experiment Controller 
     5.  Back in Terminal: Paste and ENTER `source demo.env` (for demo) OR `source prod.env` for real experiement.
 
-Now welcome the participant to the lab.
-After they finish the consent, proceed:
+### Welcome the participant to the lab. After they finish the consent, proceed:
 
 26.  Run gaze calibration:
      1.   Let participant sit down at the workspace.
@@ -88,7 +101,7 @@ After they finish the consent, proceed:
 29. Select Gaze Animation window by pressing the pygame (dino) icon.
     1.  !!! The Gaze Animation records the key presses, without focusing the window, handover initiations are not possible. Do not click anywhere else during the experiment. !!!
 
-When the demonstration is done:
+### When the demonstration is done:
 
 30. Stop State Machine by pressing STRG+C in the respective Terminal tab.
 31. In Robot Control terminal, stop panda_control by pressing STRG+C.
@@ -101,21 +114,21 @@ When the demonstration is done:
     2.  Select Gaze Animation window by pressing the pygame (dino) icon
         1.  !!! The Gaze Animation records the key presses, without focusing the window, handover initiations are not possible. Do not click anywhere else during the experiment. !!!
 
-After the experiment:
+### After the experiment:
 
 37.  As soon as the Robot Control logs show that the robot returns to the idle pose and the handover is finished, stop the State Machine by pressing STRG+C in the respective Terminal tab.
     1.  You should see now in the State Machine logs that the Data Logger logged handover and gaze data.
 38. While the participant is completing the subjective measures, find the logged data in `~/adaptive_gaze_handover/state_machine/output` and make sure that the data is complete.
 39. Stop the Gaze Tracking by pressing STRG+C in the respective Terminal tab.
 
-Restarting for a new participant:
+### Restarting for a new participant:
 
 39. Navigate to Panda Experiment Controller in the Browser and run "Move to Idle" in the "Program Controls" tab.
 40. After the robot finishes moving, go to the Robot Control terminal and stop panda_control by pressing STRG+C. Do not stop panda_moveit.
 41. Restart Robot Control using: `rosrun panda_control src/main.py` .
 42. Continue with the tutorial from step 24.
 
-Shutting of the system:
+### Shutting of the system:
 
 42. Navigate to Panda Experiment Controller in the Browser and run the program "End Experiment" in the "Program Controls" tab.
     1.  In the panda_control Terminal tab, press ENTER to confirm the release of the bowl.
@@ -138,3 +151,14 @@ Shutting of the system:
 54. Please wait a few more minutes until cutting the power of the robot server using the switch on the side. There will be still some sounds from the server but as long as the front fans are stopped, it is fine.
     1.  DO NOT TURN ON THE ROBOT AGAIN WITHIN 5 MINUTES.
 55. Plug-Off the robot server.
+
+# Common Errors
+
+- panda_control does not move robot - Logs show something like `COMMAND_ABORTED`
+  - Fix:
+    - Run "End Experiment" arm program
+    - End panda_control and panda_moveit using STRG+C
+    - Deactivate Robot
+    - Stop Robot
+    - Activate Robot
+    - Start programs again
