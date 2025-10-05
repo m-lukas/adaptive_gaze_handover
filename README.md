@@ -158,7 +158,8 @@
   - Fix:
     - Run "End Experiment" arm program
     - End panda_control and panda_moveit using STRG+C
-    - Deactivate Robot
     - Stop Robot
+    - Deactivate FCI
+    - (Lock and Unlock (after short break) Joints)
     - Activate Robot
     - Start programs again
